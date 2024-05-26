@@ -12,6 +12,8 @@
 		9A5790C02BFC223A00F643DB /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790BF2BFC223A00F643DB /* Item.swift */; };
 		9A5790C22BFC223C00F643DB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A5790C12BFC223C00F643DB /* Assets.xcassets */; };
 		9A5790C62BFC223C00F643DB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A5790C52BFC223C00F643DB /* Preview Assets.xcassets */; };
+		9A5790CD2BFC514700F643DB /* ContactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790CC2BFC514700F643DB /* ContactDetailView.swift */; };
+		9AAE463B2C003E2B00A55F00 /* CNLabeledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +24,8 @@
 		9A5790C12BFC223C00F643DB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9A5790C32BFC223C00F643DB /* Contact.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Contact.entitlements; sourceTree = "<group>"; };
 		9A5790C52BFC223C00F643DB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		9A5790CC2BFC514700F643DB /* ContactDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailView.swift; sourceTree = "<group>"; };
+		9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CNLabeledView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +60,8 @@
 			children = (
 				9A5790BB2BFC223A00F643DB /* ContactApp.swift */,
 				9A5790BD2BFC223A00F643DB /* ContentView.swift */,
+				9A5790CC2BFC514700F643DB /* ContactDetailView.swift */,
+				9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */,
 				9A5790BF2BFC223A00F643DB /* Item.swift */,
 				9A5790C12BFC223C00F643DB /* Assets.xcassets */,
 				9A5790C32BFC223C00F643DB /* Contact.entitlements */,
@@ -142,8 +148,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9A5790CD2BFC514700F643DB /* ContactDetailView.swift in Sources */,
 				9A5790BE2BFC223A00F643DB /* ContentView.swift in Sources */,
 				9A5790C02BFC223A00F643DB /* Item.swift in Sources */,
+				9AAE463B2C003E2B00A55F00 /* CNLabeledView.swift in Sources */,
 				9A5790BC2BFC223A00F643DB /* ContactApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -278,6 +286,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSContactsUsageDescription = "We need your contacts data so that we can show your contacts";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -288,7 +297,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
@@ -316,6 +325,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSContactsUsageDescription = "We need your contacts data so that we can show your contacts";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -326,7 +336,7 @@
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
