@@ -13,44 +13,45 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
     
-    @State var draggedItems: [String] = []
+    @State var tagNames: [String] = ["First Tag", "Second Tag"]
+    @State var draggedItems: [String:[String]] = ["First Tag":[], "Second Tag":[]]
     
     @State var contacts: [CNContact] = []
     @State private var selection = Set<UUID>()
     @State var searchString: String = ""
     
     var body: some View {
-        HStack {
-            List(draggedItems, id: \.self) { item in
-                Text(item)
-                Spacer()
-            }
-            .onDrop(of: ["public.text"], isTargeted: nil) { providers, location in
-                for provider in providers {
-                    provider.loadDataRepresentation(forTypeIdentifier: "public.text") { data, error in
-                        if let error {
-                            print(error)
-                        } else {
-                            draggedItems.append(String(data: data ?? "".data(using: .utf8)!, encoding: .utf8) ?? "")
+        HStack(spacing: 0) {
+            List(tagNames, id: \.self) { tag in
+                VStack(alignment: .leading) {
+                    Text(tag)
+                    ForEach(draggedItems[tag] ?? [], id: \.self) { name in
+                        Text(name)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.leading, 5)
+                }
+                .dropDestination(for: String.self) { items, location in
+                    for item in items {
+                        withAnimation(.linear) {
+                            draggedItems[tag]?.append(item)
                         }
                     }
+                    return true
                 }
-                return true
             }
             .frame(width: 150)
             .listStyle(.sidebar)
             NavigationSplitView {
                 List {
-                    ForEach(contacts.sorted(by: { lhs, rhs in
-                        lhs.givenName < rhs.givenName
-                    }), id: \.id) { item in
-                        NavigationLink {
-                            ContactDetailView(contact: item)
-                        } label: {
-                            Text(item.givenName).bold() + Text(" ") + Text(item.familyName)
+                    ForEach(contacts.sorted(), id: \.id) { item in
+                        NavigationLink(destination: ContactDetailView(contact: item)) {
+                            Group {
+                                Text(item.givenName).bold() + Text(" ") + Text(item.familyName)
+                            }
                         }
-                        .onDrag {
-                            return NSItemProvider(object: item.givenName as NSString)
+                        .draggable(item.givenName) {
+                            Text("\(item.givenName) \(item.familyName)")
                         }
                     }
                     .onDelete(perform: deleteItems)
@@ -140,6 +141,12 @@ struct ContentView: View {
                 modelContext.delete(items[index])
             }
         }
+    }
+}
+
+extension CNContact: Comparable {
+    public static func < (lhs: CNContact, rhs: CNContact) -> Bool {
+        lhs.givenName < rhs.givenName
     }
 }
 
