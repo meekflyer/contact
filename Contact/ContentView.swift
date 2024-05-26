@@ -44,14 +44,20 @@ struct ContentView: View {
             .listStyle(.sidebar)
             NavigationSplitView {
                 List {
-                    ForEach(contacts.sorted(), id: \.id) { item in
-                        NavigationLink(destination: ContactDetailView(contact: item)) {
-                            Group {
-                                Text(item.givenName).bold() + Text(" ") + Text(item.familyName)
+                    ForEach(contacts.inLetterSections(), id: \.0) { section in
+                        Section {
+                            ForEach(section.1) { contact in
+                                NavigationLink(destination: ContactDetailView(contact: contact)) {
+                                    Group {
+                                        Text(contact.givenName).bold() + Text(" ") + Text(contact.familyName)
+                                    }
+                                }
+                                .draggable(contact.givenName) {
+                                    Text("\(contact.givenName) \(contact.familyName)")
+                                }
                             }
-                        }
-                        .draggable(item.givenName) {
-                            Text("\(item.givenName) \(item.familyName)")
+                        } header: {
+                            Text(String(section.0))
                         }
                     }
                     .onDelete(perform: deleteItems)
@@ -147,6 +153,35 @@ struct ContentView: View {
 extension CNContact: Comparable {
     public static func < (lhs: CNContact, rhs: CNContact) -> Bool {
         lhs.givenName < rhs.givenName
+    }
+}
+
+extension [CNContact] {
+    func inLetterSections() -> [(Character, [CNContact])] {
+        var sections: [Character : [CNContact]] = ["#" : []]
+        
+        for contact in self {
+            if let firstLetter = contact.givenName.first?.uppercased().first {
+                if firstLetter.isLetter {
+                    if sections[firstLetter] != nil {
+                        sections[firstLetter]?.append(contact)
+                    } else {
+                        sections[firstLetter] = []
+                        sections[firstLetter]?.append(contact)
+                    }
+                } else {
+                    sections["#"]?.append(contact)
+                }
+            } else {
+                sections["#"]?.append(contact)
+            }
+        }
+        
+        if let miscValues = sections["#"], miscValues.isEmpty {
+            sections.removeValue(forKey: "#")
+        }
+        
+        return sections.sorted { $0.0 < $1.0 }
     }
 }
 
