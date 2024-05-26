@@ -13,25 +13,39 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var items: [Item]
     
+    @State var openContact: CNContact?
     @State var tagNames: [String] = ["First Tag", "Second Tag"]
-    @State var draggedItems: [String:[String]] = ["First Tag":[], "Second Tag":[]]
+    @State var tagExpanded: [String : Bool] = ["First Tag" : false, "Second Tag" : false]
+    @State var draggedItems: [String : [UUID]] = ["First Tag" : [], "Second Tag" : []]
     
     @State var contacts: [CNContact] = []
     @State private var selection = Set<UUID>()
     @State var searchString: String = ""
     
     var body: some View {
-        HStack(spacing: 0) {
-            List(tagNames, id: \.self) { tag in
-                VStack(alignment: .leading) {
-                    Text(tag)
-                    ForEach(draggedItems[tag] ?? [], id: \.self) { name in
-                        Text(name)
-                            .foregroundStyle(.secondary)
+        NavigationSplitView {
+            List(tagNames, id: \.self, selection: $selection) { tag in
+                Section(isExpanded: .init(get: {
+                    tagExpanded[tag] ?? false
+                }, set: { expanded in
+                    tagExpanded[tag] = expanded
+                })) {
+                    VStack(alignment: .leading) {
+                        ForEach(draggedItems[tag] ?? [], id: \.self) { id in
+                            if let contact = contacts.getById(id) {
+                                Text(contact.givenName)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("No name")
+                            }
+                        }
+                        .padding(.leading, 5)
                     }
-                    .padding(.leading, 5)
+                } header: {
+                    Text("\(tag) (\(draggedItems[tag]?.count ?? 0))")
                 }
-                .dropDestination(for: String.self) { items, location in
+                .contentShape(Rectangle())
+                .dropDestination(for: UUID.self) { items, location in
                     for item in items {
                         withAnimation(.linear) {
                             draggedItems[tag]?.append(item)
@@ -40,48 +54,54 @@ struct ContentView: View {
                     return true
                 }
             }
-            .frame(width: 150)
-            .listStyle(.sidebar)
-            NavigationSplitView {
-                List {
-                    ForEach(contacts.inLetterSections(), id: \.0) { section in
-                        Section {
-                            ForEach(section.1) { contact in
-                                NavigationLink(destination: ContactDetailView(contact: contact)) {
-                                    Group {
-                                        Text(contact.givenName).bold() + Text(" ") + Text(contact.familyName)
-                                    }
-                                }
-                                .draggable(contact.givenName) {
-                                    Text("\(contact.givenName) \(contact.familyName)")
-                                }
-                            }
-                        } header: {
-                            Text(String(section.0))
-                        }
-                    }
-                    .onDelete(perform: deleteItems)
-                }
-                .searchable(text: $searchString)
-                .listStyle(.plain)
-                #if os(macOS)
-                .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-                #endif
-                .toolbar {
-                #if os(iOS)
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        EditButton()
-                    }
-                #endif
-                    ToolbarItem {
-                        Button(action: addItem) {
-                            Label("Add Item", systemImage: "plus")
-                        }
+            .toolbar {
+                ToolbarItem {
+                    Button(action: addItem) {
+                        Label("Add Item", systemImage: "plus")
                     }
                 }
-            } detail: {
-                Text("Select an item")
             }
+            #if os(macOS)
+            .navigationSplitViewColumnWidth(min: 175, ideal: 175)
+            #endif
+        } content: {
+            List(selection: $selection) {
+                ForEach(contacts.inLetterSections(), id: \.0) { section in
+                    Section(String(section.0)) {
+                        ForEach(section.1) { contact in
+                            Group {
+                                Text(contact.givenName).bold() + Text(" ") + Text(contact.familyName)
+                            }
+                            .draggable(contact.id) {
+                                Text("\(contact.givenName) \(contact.familyName)")
+                            }
+                        }
+                    }
+                }
+            }
+            .searchable(text: $searchString)
+            .listStyle(.plain)
+            #if os(macOS)
+            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+            #elseif os(iOS)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
+            }
+            #endif
+                
+        } detail: {
+            Group {
+                if let id = Array(selection).last, let contact = contacts.getById(id) {
+                    ContactDetailView(contact: contact)
+                } else {
+                    Text("Select an item")
+                }
+            }
+            #if os(macOS)
+            .navigationSplitViewColumnWidth(min: 300, ideal: 500)
+            #endif
         }
         .task {
             await fetchContacts()
@@ -182,6 +202,16 @@ extension [CNContact] {
         }
         
         return sections.sorted { $0.0 < $1.0 }
+    }
+    
+    func getById(_ id: UUID) -> CNContact? {
+        self.first(where: { $0.id == id })
+    }
+}
+
+extension UUID: Transferable {
+    public static var transferRepresentation: some TransferRepresentation {
+        CodableRepresentation(contentType: .text)
     }
 }
 

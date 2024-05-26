@@ -41,7 +41,8 @@ struct ContactDetailView: View {
                 }
                 if !contact.emailAddresses.isEmpty {
                     ForEach(contact.emailAddresses, id: \.self) { address in
-                        CNLabeledView(value: address)
+                        EmptyView()
+//                        CNLabeledView(value: address)
                     }
                     Divider()
                         .padding(.horizontal)
