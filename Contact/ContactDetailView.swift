@@ -34,15 +34,14 @@ struct ContactDetailView: View {
             ScrollView {
                 if !contact.phoneNumbers.isEmpty {
                     ForEach(contact.phoneNumbers, id: \.self) { number in
-                        CNLabeledView(value: number)
+                        CNLabeledView(value: number, type: .phoneNumber)
                     }
                     Divider()
                         .padding(.horizontal)
                 }
                 if !contact.emailAddresses.isEmpty {
                     ForEach(contact.emailAddresses, id: \.self) { address in
-                        EmptyView()
-//                        CNLabeledView(value: address)
+                        CNLabeledView(value: address, type: .email)
                     }
                     Divider()
                         .padding(.horizontal)
@@ -61,7 +60,7 @@ struct ContactDetailView: View {
                 profileImage = Image(nsImage: nsImage)
             }
         #elseif canImport(UIKit)
-            if let uiImage = UIImage(data: contact.imageData) {
+            if let uiImage = UIImage(data: contact.imageData ?? Data()) {
                 profileImage = Image(uiImage: uiImage)
             }
         #endif

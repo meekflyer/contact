@@ -201,6 +201,10 @@ extension [CNContact] {
             sections.removeValue(forKey: "#")
         }
         
+        for section in sections {
+            sections[section.key] = sections[section.key]?.sorted()
+        }
+        
         return sections.sorted { $0.0 < $1.0 }
     }
     
