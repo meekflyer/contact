@@ -13,26 +13,45 @@ enum ContactValueType {
     case email
 }
 
-struct CNLabeledView<T>: View where T:NSCopying, T:NSSecureCoding {
-    let value: CNLabeledValue<T>
-    let type: ContactValueType
+struct LabeledView: View {
+    let label: AnyView
+    let value: AnyView
+    
+    init(label: AnyView, value: AnyView) {
+        self.label = label
+        self.value = value
+    }
+    
+    init(label: String, value: String) {
+        self.label = AnyView(Text(label).cnLabel())
+        self.value = AnyView(Text(value))
+    }
     
     var body: some View {
         HStack(spacing: 5) {
             VStack {
                 HStack {
                     Spacer()
-                    getLabel()
+                    label
                 }
                 Spacer()
             }
             .frame(width: 150)
             VStack(alignment: .leading) {
-                getLink()
+                value
                 Spacer()
             }
             Spacer()
         }
+    }
+}
+
+struct CNLabeledView<T>: View where T:NSCopying, T:NSSecureCoding {
+    let value: CNLabeledValue<T>
+    let type: ContactValueType
+    
+    var body: some View {
+        LabeledView(label: AnyView(getLabel()), value: AnyView(getLink()))
     }
     
     @ViewBuilder
@@ -58,7 +77,7 @@ struct CNLabeledView<T>: View where T:NSCopying, T:NSSecureCoding {
                 .cnLabel()
         }
     }
-        
+    
     @ViewBuilder
     func getLink() -> some View {
         if type == .phoneNumber, let phoneNumber = value as? CNLabeledValue<CNPhoneNumber> {

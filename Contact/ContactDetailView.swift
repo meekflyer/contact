@@ -10,7 +10,15 @@ import Contacts
 
 struct ContactDetailView: View {
     let contact: CNContact
+    let dateFormatter: DateFormatter
     @State var profileImage = Image(systemName: "person.fill")
+    
+    init(contact: CNContact, profileImage: SwiftUI.Image = Image(systemName: "person.fill")) {
+        self.contact = contact
+        self.dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "MMMM d"
+        self.profileImage = profileImage
+    }
     
     var body: some View {
         VStack {
@@ -36,15 +44,16 @@ struct ContactDetailView: View {
                     ForEach(contact.phoneNumbers, id: \.self) { number in
                         CNLabeledView(value: number, type: .phoneNumber)
                     }
-                    Divider()
-                        .padding(.horizontal)
+                    Divider().padding(.horizontal)
                 }
                 if !contact.emailAddresses.isEmpty {
                     ForEach(contact.emailAddresses, id: \.self) { address in
                         CNLabeledView(value: address, type: .email)
                     }
-                    Divider()
-                        .padding(.horizontal)
+                    Divider().padding(.horizontal)
+                }
+                if let birthday = contact.birthday {
+                    LabeledView(label: "birthday", value: dateFormatter.string(from: Calendar.current.date(from: birthday)!))
                 }
             }
             
