@@ -41,19 +41,26 @@ struct ContactDetailView: View {
             
             ScrollView {
                 if !contact.phoneNumbers.isEmpty {
-                    ForEach(contact.phoneNumbers, id: \.self) { number in
+                    ForEach(contact.phoneNumbers) { number in
                         CNLabeledView(value: number, type: .phoneNumber)
                     }
                     Divider().padding(.horizontal)
                 }
                 if !contact.emailAddresses.isEmpty {
-                    ForEach(contact.emailAddresses, id: \.self) { address in
-                        CNLabeledView(value: address, type: .email)
+                    ForEach(contact.emailAddresses) { email in
+                        CNLabeledView(value: email, type: .email)
                     }
                     Divider().padding(.horizontal)
                 }
                 if let birthday = contact.birthday {
                     LabeledView(label: "birthday", value: dateFormatter.string(from: Calendar.current.date(from: birthday)!))
+                    Divider()
+                }
+                if !contact.postalAddresses.isEmpty {
+                    ForEach(contact.postalAddresses) { address in
+                        CNLabeledView(value: address, type: .address)
+                    }
+                    Divider()
                 }
             }
             

@@ -11,6 +11,7 @@ import Contacts
 enum ContactValueType {
     case phoneNumber
     case email
+    case address
 }
 
 struct LabeledView: View {
@@ -72,6 +73,13 @@ struct CNLabeledView<T>: View where T:NSCopying, T:NSSecureCoding {
                 Text("email")
                     .cnLabel()
             }
+        } else if type == .address, let address = value as? CNLabeledValue<CNPostalAddress> {
+            if let label = address.label { Text(CNLabeledValue<T>.localizedString(forLabel: label))
+                    .cnLabel()
+            } else {
+                Text("address")
+                    .cnLabel()
+            }
         } else {
             Text("Label Error")
                 .cnLabel()
@@ -86,11 +94,21 @@ struct CNLabeledView<T>: View where T:NSCopying, T:NSSecureCoding {
             } else {
                 Text(phoneNumber.value.stringValue)
             }
-        } else if type == .email, let address = value as? CNLabeledValue<NSString> {
-            if let URL = URL(string: "mailto://\(address.value)") {
-                Link(String(address.value), destination: URL)
+        } else if type == .email, let email = value as? CNLabeledValue<NSString> {
+            if let URL = URL(string: "mailto://\(email.value)") {
+                Link(String(email.value), destination: URL)
             } else {
-                Text(String(address.value))
+                Text(String(email.value))
+            }
+        } else if type == .address, let address = value as? CNLabeledValue<CNPostalAddress> {
+            if let URL = URL(string: "http://maps.apple.com/?address=\(CNPostalAddressFormatter().string(from: address.value))") {
+                Link(destination: URL) {
+                    Text(CNPostalAddressFormatter().string(from: address.value))
+                        .multilineTextAlignment(.leading)
+                }
+            } else {
+                Text(CNPostalAddressFormatter().string(from: address.value))
+                    .multilineTextAlignment(.leading)
             }
         } else {
             Text("Value Error")
