@@ -10,8 +10,9 @@ import SwiftData
 import Contacts
 
 struct ContentView: View {
+    @Environment(\.self) var environment
     @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @Query private var tags: [Tag]
     
     @State var openContact: CNContact?
     @State var tagNames: [String] = ["First Tag", "Second Tag"]
@@ -56,7 +57,7 @@ struct ContentView: View {
             }
             .toolbar {
                 ToolbarItem {
-                    Button(action: addItem) {
+                    Button(action: {}) {
                         Label("Add Item", systemImage: "plus")
                     }
                 }
@@ -90,7 +91,6 @@ struct ContentView: View {
                 }
             }
             #endif
-                
         } detail: {
             Group {
                 if let id = Array(selection).last, let contact = contacts.getById(id) {
@@ -154,9 +154,9 @@ struct ContentView: View {
         self.contacts = contacts
     }
 
-    private func addItem() {
+    private func addItem(name: String, color: Color, parentID: String? = nil) {
         withAnimation {
-            let newItem = Item(timestamp: Date())
+            let newItem = Tag(id: UUID().uuidString, name: name, color: color.resolve(in: environment), parentID: parentID)
             modelContext.insert(newItem)
         }
     }
@@ -164,7 +164,7 @@ struct ContentView: View {
     private func deleteItems(offsets: IndexSet) {
         withAnimation {
             for index in offsets {
-                modelContext.delete(items[index])
+                modelContext.delete(tags[index])
             }
         }
     }
@@ -221,5 +221,5 @@ extension UUID: Transferable {
 
 #Preview {
     ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Tag.self, inMemory: true)
 }

@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		9A5790BC2BFC223A00F643DB /* ContactApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790BB2BFC223A00F643DB /* ContactApp.swift */; };
 		9A5790BE2BFC223A00F643DB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790BD2BFC223A00F643DB /* ContentView.swift */; };
-		9A5790C02BFC223A00F643DB /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790BF2BFC223A00F643DB /* Item.swift */; };
+		9A5790C02BFC223A00F643DB /* Tag.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790BF2BFC223A00F643DB /* Tag.swift */; };
 		9A5790C22BFC223C00F643DB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A5790C12BFC223C00F643DB /* Assets.xcassets */; };
 		9A5790C62BFC223C00F643DB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A5790C52BFC223C00F643DB /* Preview Assets.xcassets */; };
 		9A5790CD2BFC514700F643DB /* ContactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790CC2BFC514700F643DB /* ContactDetailView.swift */; };
@@ -20,7 +20,7 @@
 		9A5790B82BFC223A00F643DB /* Contact.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Contact.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A5790BB2BFC223A00F643DB /* ContactApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactApp.swift; sourceTree = "<group>"; };
 		9A5790BD2BFC223A00F643DB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		9A5790BF2BFC223A00F643DB /* Item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
+		9A5790BF2BFC223A00F643DB /* Tag.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tag.swift; sourceTree = "<group>"; };
 		9A5790C12BFC223C00F643DB /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		9A5790C32BFC223C00F643DB /* Contact.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Contact.entitlements; sourceTree = "<group>"; };
 		9A5790C52BFC223C00F643DB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -62,7 +62,7 @@
 				9A5790BD2BFC223A00F643DB /* ContentView.swift */,
 				9A5790CC2BFC514700F643DB /* ContactDetailView.swift */,
 				9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */,
-				9A5790BF2BFC223A00F643DB /* Item.swift */,
+				9A5790BF2BFC223A00F643DB /* Tag.swift */,
 				9A5790C12BFC223C00F643DB /* Assets.xcassets */,
 				9A5790C32BFC223C00F643DB /* Contact.entitlements */,
 				9A5790C42BFC223C00F643DB /* Preview Content */,
@@ -150,7 +150,7 @@
 			files = (
 				9A5790CD2BFC514700F643DB /* ContactDetailView.swift in Sources */,
 				9A5790BE2BFC223A00F643DB /* ContentView.swift in Sources */,
-				9A5790C02BFC223A00F643DB /* Item.swift in Sources */,
+				9A5790C02BFC223A00F643DB /* Tag.swift in Sources */,
 				9AAE463B2C003E2B00A55F00 /* CNLabeledView.swift in Sources */,
 				9A5790BC2BFC223A00F643DB /* ContactApp.swift in Sources */,
 			);
@@ -280,7 +280,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Contact/Contact.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"Contact/Preview Content\"";
 				DEVELOPMENT_TEAM = 9M9T5Z6BRW;
 				ENABLE_HARDENED_RUNTIME = YES;
@@ -320,7 +320,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Contact/Contact.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEVELOPMENT_ASSET_PATHS = "\"Contact/Preview Content\"";
 				DEVELOPMENT_TEAM = 9M9T5Z6BRW;
 				ENABLE_HARDENED_RUNTIME = YES;

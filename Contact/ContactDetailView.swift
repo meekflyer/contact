@@ -66,9 +66,6 @@ struct ContactDetailView: View {
             
             Spacer()
         }
-        .toolbar {
-            Text("\(contact.givenName) \(contact.familyName)")
-        }
         .onChange(of: contact) {
             profileImage = Image(systemName: "person.fill")
         #if canImport(AppKit)
