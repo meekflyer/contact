@@ -12,12 +12,12 @@ import Contacts
 struct ContentView: View {
     @Environment(\.self) var environment
     @Environment(\.modelContext) private var modelContext
-    @Query private var tags: [Tag]
+//    @Query private var tags: [Tag]
+    @State private var tags: [Tag] = []
     
     @State var openContact: CNContact?
     @State var tagNames: [String] = ["First Tag", "Second Tag"]
-    @State var tagExpanded: [String : Bool] = ["First Tag" : false, "Second Tag" : false]
-    @State var draggedItems: [String : [UUID]] = ["First Tag" : [], "Second Tag" : []]
+    @State var tagExpanded: [String : Bool] = [:]
     
     @State var contacts: [CNContact] = []
     @State private var selection = Set<UUID>()
@@ -25,15 +25,23 @@ struct ContentView: View {
     
     var body: some View {
         NavigationSplitView {
-            List(tagNames, id: \.self, selection: $selection) { tag in
-                Section(isExpanded: .init(get: {
-                    tagExpanded[tag] ?? false
-                }, set: { expanded in
-                    tagExpanded[tag] = expanded
-                })) {
+            List(tags, selection: $selection) { tag in
+                Section(isExpanded: .init(
+                    get: {
+                        if let expanded = tagExpanded[tag.id] {
+                            return expanded
+                        } else {
+                            tagExpanded[tag.id] = false
+                            return false
+                        }
+                    },
+                    set: { expanded in
+                        tagExpanded[tag.id] = expanded
+                    }
+                ), content: {
                     VStack(alignment: .leading) {
-                        ForEach(draggedItems[tag] ?? [], id: \.self) { id in
-                            if let contact = contacts.getById(id) {
+                        ForEach(tag.contactIDs, id: \.self) { id in
+                            if let contact = contacts.getById(UUID(uuidString: id) ?? UUID()) {
                                 Text(contact.givenName)
                                     .foregroundStyle(.secondary)
                             } else {
@@ -42,14 +50,14 @@ struct ContentView: View {
                         }
                         .padding(.leading, 5)
                     }
-                } header: {
-                    Text("\(tag) (\(draggedItems[tag]?.count ?? 0))")
-                }
+                }, header: {
+                    Text("\(tag.name) (\(tag.contactIDs.count))")
+                })
                 .contentShape(Rectangle())
                 .dropDestination(for: UUID.self) { items, location in
-                    for item in items {
-                        withAnimation(.linear) {
-                            draggedItems[tag]?.append(item)
+                    withAnimation(.linear) {
+                        if let index = tags.firstIndex(where: { $0.id == tag.id }) {
+                            tags[index].contactIDs.append(contentsOf: items.map({ $0.uuidString }))
                         }
                     }
                     return true
@@ -106,6 +114,9 @@ struct ContentView: View {
         .task {
             await fetchContacts()
         }
+        .onAppear {
+            tags.append(Tag(name: "Test Tag", color: Color.green.resolve(in: environment), contactIDs: []))
+        }
     }
     
     private func fetchContacts() async {
@@ -154,20 +165,20 @@ struct ContentView: View {
         self.contacts = contacts
     }
 
-    private func addItem(name: String, color: Color, parentID: String? = nil) {
-        withAnimation {
-            let newItem = Tag(id: UUID().uuidString, name: name, color: color.resolve(in: environment), parentID: parentID)
-            modelContext.insert(newItem)
-        }
-    }
+//    private func addItem(name: String, color: Color, parentID: String? = nil) {
+//        withAnimation {
+//            let newItem = Tag(name: name, color: color.resolve(in: environment), parentID: parentID)
+//            modelContext.insert(newItem)
+//        }
+//    }
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(tags[index])
-            }
-        }
-    }
+//    private func deleteItems(offsets: IndexSet) {
+//        withAnimation {
+//            for index in offsets {
+//                modelContext.delete(tags[index])
+//            }
+//        }
+//    }
 }
 
 extension CNContact: Comparable {

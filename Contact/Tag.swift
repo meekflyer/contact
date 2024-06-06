@@ -16,8 +16,8 @@ final class Tag {
     var parentID: String?
     var contactIDs: [String]
     
-    init(id: String, name: String, color: Color.Resolved, parentID: String? = nil, contactIDs: [String] = []) {
-        self.id = id
+    init(name: String, color: Color.Resolved, parentID: String? = nil, contactIDs: [String] = []) {
+        self.id = UUID().uuidString
         self.name = name
         self.color = color.hexString
         self.parentID = parentID
