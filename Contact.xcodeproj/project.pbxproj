@@ -14,6 +14,8 @@
 		9A5790C62BFC223C00F643DB /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 9A5790C52BFC223C00F643DB /* Preview Assets.xcassets */; };
 		9A5790CD2BFC514700F643DB /* ContactDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790CC2BFC514700F643DB /* ContactDetailView.swift */; };
 		9AAE463B2C003E2B00A55F00 /* CNLabeledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */; };
+		9AB781F82C1147DF009586B8 /* CreateTagView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB781F72C1147DF009586B8 /* CreateTagView.swift */; };
+		9AB781FA2C116267009586B8 /* TagSidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AB781F92C116267009586B8 /* TagSidebarView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,8 @@
 		9A5790C52BFC223C00F643DB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9A5790CC2BFC514700F643DB /* ContactDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailView.swift; sourceTree = "<group>"; };
 		9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CNLabeledView.swift; sourceTree = "<group>"; };
+		9AB781F72C1147DF009586B8 /* CreateTagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTagView.swift; sourceTree = "<group>"; };
+		9AB781F92C116267009586B8 /* TagSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagSidebarView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +65,9 @@
 				9A5790BB2BFC223A00F643DB /* ContactApp.swift */,
 				9A5790BD2BFC223A00F643DB /* ContentView.swift */,
 				9A5790CC2BFC514700F643DB /* ContactDetailView.swift */,
+				9AB781F92C116267009586B8 /* TagSidebarView.swift */,
 				9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */,
+				9AB781F72C1147DF009586B8 /* CreateTagView.swift */,
 				9A5790BF2BFC223A00F643DB /* Tag.swift */,
 				9A5790C12BFC223C00F643DB /* Assets.xcassets */,
 				9A5790C32BFC223C00F643DB /* Contact.entitlements */,
@@ -149,8 +155,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				9A5790CD2BFC514700F643DB /* ContactDetailView.swift in Sources */,
+				9AB781FA2C116267009586B8 /* TagSidebarView.swift in Sources */,
 				9A5790BE2BFC223A00F643DB /* ContentView.swift in Sources */,
 				9A5790C02BFC223A00F643DB /* Tag.swift in Sources */,
+				9AB781F82C1147DF009586B8 /* CreateTagView.swift in Sources */,
 				9AAE463B2C003E2B00A55F00 /* CNLabeledView.swift in Sources */,
 				9A5790BC2BFC223A00F643DB /* ContactApp.swift in Sources */,
 			);

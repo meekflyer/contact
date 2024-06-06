@@ -10,63 +10,43 @@ import SwiftData
 import Contacts
 
 struct ContentView: View {
-    @Environment(\.self) var environment
     @Environment(\.modelContext) private var modelContext
-//    @Query private var tags: [Tag]
-    @State private var tags: [Tag] = []
+    @Query private var tags: [Tag]
     
     @State var openContact: CNContact?
     @State var tagNames: [String] = ["First Tag", "Second Tag"]
-    @State var tagExpanded: [String : Bool] = [:]
     
     @State var contacts: [CNContact] = []
     @State private var selection = Set<UUID>()
     @State var searchString: String = ""
-    
+
+    @State var showCreateTag = false
+
     var body: some View {
         NavigationSplitView {
-            List(tags, selection: $selection) { tag in
-                Section(isExpanded: .init(
-                    get: {
-                        if let expanded = tagExpanded[tag.id] {
-                            return expanded
-                        } else {
-                            tagExpanded[tag.id] = false
-                            return false
-                        }
-                    },
-                    set: { expanded in
-                        tagExpanded[tag.id] = expanded
+            Group {
+                if tags.isEmpty {
+                    VStack {
+                        Text("Click the + button to create your first tag!")
+                            .foregroundStyle(.secondary)
+                        Spacer()
                     }
-                ), content: {
-                    VStack(alignment: .leading) {
-                        ForEach(tag.contactIDs, id: \.self) { id in
-                            if let contact = contacts.getById(UUID(uuidString: id) ?? UUID()) {
-                                Text(contact.givenName)
-                                    .foregroundStyle(.secondary)
-                            } else {
-                                Text("No name")
-                            }
-                        }
-                        .padding(.leading, 5)
+                    .padding()
+                } else {
+                    List(tags.filter({ $0.parentID == nil }), selection: $selection) { tag in
+                        TagSidebarView(tag: tag, contacts: contacts)
                     }
-                }, header: {
-                    Text("\(tag.name) (\(tag.contactIDs.count))")
-                })
-                .contentShape(Rectangle())
-                .dropDestination(for: UUID.self) { items, location in
-                    withAnimation(.linear) {
-                        if let index = tags.firstIndex(where: { $0.id == tag.id }) {
-                            tags[index].contactIDs.append(contentsOf: items.map({ $0.uuidString }))
-                        }
-                    }
-                    return true
                 }
             }
             .toolbar {
                 ToolbarItem {
-                    Button(action: {}) {
+                    Button(action: { showCreateTag.toggle() }) {
                         Label("Add Item", systemImage: "plus")
+                    }
+                    .popover(isPresented: $showCreateTag, arrowEdge: .bottom) {
+                        CreateTagView(closeView: {
+                            showCreateTag = false
+                        })
                     }
                 }
             }
@@ -93,11 +73,6 @@ struct ContentView: View {
             #if os(macOS)
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
             #elseif os(iOS)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-            }
             #endif
         } detail: {
             Group {
@@ -113,9 +88,6 @@ struct ContentView: View {
         }
         .task {
             await fetchContacts()
-        }
-        .onAppear {
-            tags.append(Tag(name: "Test Tag", color: Color.green.resolve(in: environment), contactIDs: []))
         }
     }
     
@@ -164,21 +136,6 @@ struct ContentView: View {
         
         self.contacts = contacts
     }
-
-//    private func addItem(name: String, color: Color, parentID: String? = nil) {
-//        withAnimation {
-//            let newItem = Tag(name: name, color: color.resolve(in: environment), parentID: parentID)
-//            modelContext.insert(newItem)
-//        }
-//    }
-
-//    private func deleteItems(offsets: IndexSet) {
-//        withAnimation {
-//            for index in offsets {
-//                modelContext.delete(tags[index])
-//            }
-//        }
-//    }
 }
 
 extension CNContact: Comparable {
