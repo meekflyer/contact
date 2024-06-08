@@ -15,18 +15,24 @@ struct EditView: View {
     var body: some View {
         VStack {
             List(tags) { tag in
-                HStack {
-                    Text(tag.name)
-                        .foregroundStyle(.primary)
-                        .bold()
-                    Spacer()
-                    Button("Delete") {
-                        deleteTag(tag)
+                VStack {
+                    HStack {
+                        Text(tag.name)
+                            .foregroundStyle(.primary)
+                            .bold()
+                        Spacer()
+
+                        Button("Delete") {
+                            deleteTag(tag)
+                        }
+                    }
+                    if let last = tags.last, tag != last {
+                        Divider()
                     }
                 }
             }
-            .padding()
-            .frame(width: 200, height: 250)
+            .safeAreaPadding(5)
+            .frame(width: 500, height: 200)
             .listStyle(.sidebar)
         }
     }

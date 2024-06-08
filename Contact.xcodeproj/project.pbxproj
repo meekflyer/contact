@@ -71,10 +71,10 @@
 				9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */,
 				9AB781F72C1147DF009586B8 /* CreateTagView.swift */,
 				9A5790BF2BFC223A00F643DB /* Tag.swift */,
+				9A9AD94D2C14CBFA0000C610 /* EditView.swift */,
 				9A5790C12BFC223C00F643DB /* Assets.xcassets */,
 				9A5790C32BFC223C00F643DB /* Contact.entitlements */,
 				9A5790C42BFC223C00F643DB /* Preview Content */,
-				9A9AD94D2C14CBFA0000C610 /* EditView.swift */,
 			);
 			path = Contact;
 			sourceTree = "<group>";

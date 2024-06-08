@@ -29,6 +29,24 @@ extension Tag {
     func getColor() -> Color {
         return Color(hex: color)
     }
+
+    func isDescendent(of tag: Tag, in tags: [Tag]) -> Bool {
+        if self == tag {
+            return true
+        }
+        let children = tags.children(of: tag)
+        if children.isEmpty {
+            return false
+        } else if children.contains(self) {
+            return true
+        } else {
+            for child in children {
+                return self.isDescendent(of: child, in: tags)
+            }
+        }
+
+        return false
+    }
 }
 
 extension [Tag] {

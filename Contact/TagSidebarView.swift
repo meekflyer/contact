@@ -72,15 +72,35 @@ struct TagSidebarView: View {
             }
             .foregroundStyle(isTargeted ? .blue : .secondary)
             .fontWeight(.heavy)
+            .draggable(UUID(uuidString: tag.id) ?? UUID()) {
+                Text(tag.name)
+            }
         })
         .dropDestination(for: UUID.self, action: { items, _ in
-            withAnimation(.linear) {
-                dropItems(items: items)
+            if items.count == 1, let draggedID = items.first, let tagIndex = tags.firstIndex(where: { $0.id == draggedID.uuidString }) {
+                // This is a tag
+                Task {
+                    await dropTag(droppedIndex: tagIndex, onto: tag)
+                }
+                return true
+            } else {
+                // This is an array of contacts
+                return dropItems(items: items)
             }
         }, isTargeted: { isTargeted in
             self.isTargeted = isTargeted
         })
         .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func dropTag(droppedIndex tagIndex: Array<Tag>.Index, onto tag: Tag) async -> Bool {
+        if !tag.isDescendent(of: tags[tagIndex], in: tags) {
+            if tags.indices.contains(tagIndex) {
+                tags[tagIndex].parentID = tag.id
+            }
+            return true
+        }
+        return false
     }
 
     private func dropItems(items: [UUID]) -> Bool {

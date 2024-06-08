@@ -20,6 +20,7 @@ struct ContentView: View {
     @State private var contactSelection = Set<UUID>()
     @State var searchString: String = ""
 
+    @State private var isRootTagTargeted = false
     @State var showCreateTag = false
     @State var showEdit = false
 
@@ -59,6 +60,19 @@ struct ContentView: View {
             #if os(macOS)
             .navigationSplitViewColumnWidth(min: 175, ideal: 175)
             #endif
+            .dropDestination(for: UUID.self, action: { items, _ in
+                if items.count == 1, let draggedID = items.first, let tagIndex = tags.firstIndex(where: { $0.id == draggedID.uuidString }) {
+                    // This is a tag
+                    tags[tagIndex].parentID = nil
+                }
+                return false
+            }, isTargeted: { isTargeted in
+                self.isRootTagTargeted = isTargeted
+            })
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isRootTagTargeted ? .blue : .clear, lineWidth: 2)
+            }
         } content: {
             List(selection: $contactSelection) {
                 ForEach(contacts.inLetterSections(), id: \.0) { section in
