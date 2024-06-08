@@ -29,6 +29,7 @@
 		9A5790C52BFC223C00F643DB /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		9A5790CC2BFC514700F643DB /* ContactDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactDetailView.swift; sourceTree = "<group>"; };
 		9A9AD94D2C14CBFA0000C610 /* EditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditView.swift; sourceTree = "<group>"; };
+		9A9AD9522C150BFC0000C610 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9AAE463A2C003E2B00A55F00 /* CNLabeledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CNLabeledView.swift; sourceTree = "<group>"; };
 		9AB781F72C1147DF009586B8 /* CreateTagView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTagView.swift; sourceTree = "<group>"; };
 		9AB781F92C116267009586B8 /* TagSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagSidebarView.swift; sourceTree = "<group>"; };
@@ -64,6 +65,7 @@
 		9A5790BA2BFC223A00F643DB /* Contact */ = {
 			isa = PBXGroup;
 			children = (
+				9A9AD9522C150BFC0000C610 /* Info.plist */,
 				9A5790BB2BFC223A00F643DB /* ContactApp.swift */,
 				9A5790BD2BFC223A00F643DB /* ContentView.swift */,
 				9A5790CC2BFC514700F643DB /* ContactDetailView.swift */,
@@ -298,6 +300,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Contact/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSContactsUsageDescription = "We need your contacts data so that we can show your contacts";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -338,6 +341,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Contact/Info.plist;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.social-networking";
 				INFOPLIST_KEY_NSContactsUsageDescription = "We need your contacts data so that we can show your contacts";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
