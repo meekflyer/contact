@@ -10,54 +10,97 @@ import SwiftData
 import Contacts
 
 struct TagSidebarView: View {
-    @Environment(\.modelContext) private var modelContext
     @Query private var tags: [Tag]
     let tag: Tag
     let contacts: [CNContact]
     var expandable = true
 
     @State private var tagExpanded = false
+    @State private var isTargeted = false
 
     var body: some View {
         Section(content: {
             VStack(alignment: .leading, spacing: 5) {
-                ForEach(tag.contactIDs, id: \.self) { id in
-                    if let contact = contacts.getById(UUID(uuidString: id) ?? UUID()) {
-                        Text(contact.givenName)
-                            .font(.callout)
-                            .foregroundStyle(.secondary)
-                    } else {
-                        if contacts.isEmpty {
-                            Text("Loading...")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
-                        } else {
-                            Text("No name")
-                                .font(.callout)
-                                .foregroundStyle(.secondary)
+                HStack {
+                    VStack(alignment: .leading) {
+                        ForEach(tag.contactIDs.sorted(by: { lhs, rhs in
+                            let lhsContact = contacts.getById(UUID(uuidString: lhs) ?? UUID())
+                            let rhsContact = contacts.getById(UUID(uuidString: rhs) ?? UUID())
+                            if let lhsContact, let rhsContact {
+                                let lhsName = lhsContact.givenName + lhsContact.familyName
+                                let rhsName = rhsContact.givenName + rhsContact.familyName
+                                return lhsName < rhsName
+                            }
+                            return lhs < rhs
+                        }), id: \.self) { id in
+                            if let contact = contacts.getById(UUID(uuidString: id) ?? UUID()) {
+                                Text(contact.givenName + " " + contact.familyName)
+                                    .font(.callout)
+                                    .foregroundStyle(.secondary)
+                                    .draggable(contact.id)
+                            } else {
+                                if contacts.isEmpty {
+                                    Text("Loading...")
+                                        .font(.callout)
+                                        .foregroundStyle(.secondary)
+                                } else {
+                                    Text("No name")
+                                        .font(.callout)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
                         }
                     }
+                    Spacer()
                 }
-                ForEach(tags.filter({ $0.parentID == tag.id })) { tag in
+                .contentShape(Rectangle())
+                .overlay {
+                    RoundedRectangle(cornerRadius: 5)
+                        .stroke(isTargeted ? .blue : .clear, lineWidth: 2)
+                }
+                ForEach(tags.children(of: tag)) { tag in
                     TagSidebarView(tag: tag, contacts: contacts, expandable: false)
                 }
             }
-            .padding(.leading, 5)
+            .padding(.leading, 7.5)
         }, header: {
-            Text("\(tag.name) (\(tag.contactIDs.count))")
-                .foregroundStyle(.secondary)
-                .font(.subheadline)
-                .fontWeight(.heavy)
+            VStack(alignment: .leading, spacing: 0) {
+                Text(tag.name)
+                    .font(.subheadline)
+                    .padding(.leading, 5)
+                Divider()
+            }
+            .foregroundStyle(isTargeted ? .blue : .secondary)
+            .fontWeight(.heavy)
         })
-        .dropDestination(for: UUID.self) { items, location in
+        .dropDestination(for: UUID.self, action: { items, _ in
             withAnimation(.linear) {
-                if let index = tags.firstIndex(where: { $0.id == tag.id }) {
-                    tags[index].contactIDs.append(contentsOf: items.map({ $0.uuidString }))
+                dropItems(items: items)
+            }
+        }, isTargeted: { isTargeted in
+            self.isTargeted = isTargeted
+        })
+        .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    private func dropItems(items: [UUID]) -> Bool {
+        if let index = tags.firstIndex(where: { $0.id == tag.id }) {
+            tags[index].contactIDs.formUnion(items.map({ $0.uuidString }))
+            if let parentID = tag.parentID,
+               let parentIndex = tags.firstIndex(where: { $0.id == parentID }) {
+                tags[parentIndex].contactIDs.subtract(items.map({ $0.uuidString }))
+            }
+            let children = tags.children(of: tag)
+            if !children.isEmpty {
+                for child in children {
+                    if let childIndex = tags.firstIndex(where: { $0.id == child.id }) {
+                        tags[childIndex].contactIDs.subtract(items.map({ $0.uuidString }))
+                    }
                 }
             }
             return true
         }
-        .transition(.move(edge: .top).combined(with: .opacity))
+        return false
     }
 }
 

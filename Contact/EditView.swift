@@ -33,7 +33,7 @@ struct EditView: View {
 
     private func deleteTag(_ tag: Tag) {
         withAnimation {
-            tags.filter({ $0.parentID == tag.id }).forEach { childTag in
+            tags.children(of: tag).forEach { childTag in
                 modelContext.delete(childTag)
             }
             modelContext.delete(tag)

@@ -17,7 +17,7 @@ struct ContentView: View {
     @State var tagNames: [String] = ["First Tag", "Second Tag"]
     
     @State var contacts: [CNContact] = []
-    @State private var selection = Set<UUID>()
+    @State private var contactSelection = Set<UUID>()
     @State var searchString: String = ""
 
     @State var showCreateTag = false
@@ -32,7 +32,7 @@ struct ContentView: View {
                         .padding()
                     Spacer()
                 } else {
-                    List(tags.filter({ $0.parentID == nil }), selection: $selection) { tag in
+                    List(tags.filter({ $0.parentID == nil })) { tag in
                         TagSidebarView(tag: tag, contacts: contacts)
                     }
                 }
@@ -60,7 +60,7 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 175, ideal: 175)
             #endif
         } content: {
-            List(selection: $selection) {
+            List(selection: $contactSelection) {
                 ForEach(contacts.inLetterSections(), id: \.0) { section in
                     Section(String(section.0)) {
                         ForEach(section.1) { contact in
@@ -82,7 +82,7 @@ struct ContentView: View {
             #endif
         } detail: {
             Group {
-                if let id = Array(selection).last, let contact = contacts.getById(id) {
+                if let id = Array(contactSelection).last, let contact = contacts.getById(id) {
                     ContactDetailView(contact: contact)
                 } else {
                     Text("Select an item")

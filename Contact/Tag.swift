@@ -14,18 +14,26 @@ final class Tag {
     var name: String
     private var color: String
     var parentID: String?
-    var contactIDs: [String]
-    
-    init(name: String, color: Color.Resolved, parentID: String? = nil, contactIDs: [String] = []) {
+    var contactIDs: Set<String>
+
+    init(name: String, color: Color.Resolved, parentID: String? = nil, contactIDs: Set<String> = []) {
         self.id = UUID().uuidString
         self.name = name
         self.color = color.hexString
         self.parentID = parentID
         self.contactIDs = contactIDs
     }
-    
+}
+
+extension Tag {
     func getColor() -> Color {
         return Color(hex: color)
+    }
+}
+
+extension [Tag] {
+    func children(of tag: Tag) -> [Tag] {
+        return self.filter({ $0.parentID == tag.id })
     }
 }
 
