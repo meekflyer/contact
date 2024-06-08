@@ -24,14 +24,12 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            Group {
+            VStack {
                 if tags.isEmpty {
-                    VStack {
-                        Text("Click the + button to create your first tag!")
-                            .foregroundStyle(.secondary)
-                        Spacer()
-                    }
-                    .padding()
+                    Text("Click the + button to create your first tag!")
+                        .foregroundStyle(.secondary)
+                        .padding()
+                    Spacer()
                 } else {
                     List(tags.filter({ $0.parentID == nil }), selection: $selection) { tag in
                         TagSidebarView(tag: tag, contacts: contacts)

@@ -44,10 +44,12 @@ struct CreateTagView: View {
     }
 
     private func addItem(name: String, color: Color, parentID: String? = nil) {
-        withAnimation {
-            let newItem = Tag(name: name, color: color.resolve(in: environment), parentID: parentID)
-            modelContext.insert(newItem)
-            closeView()
+        if !name.isEmpty {
+            withAnimation {
+                let newItem = Tag(name: name, color: color.resolve(in: environment), parentID: parentID)
+                modelContext.insert(newItem)
+                closeView()
+            }
         }
     }
 }
