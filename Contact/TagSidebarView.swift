@@ -48,11 +48,6 @@ struct TagSidebarView: View {
                 .foregroundStyle(.secondary)
                 .font(.subheadline)
                 .fontWeight(.heavy)
-                .contextMenu {
-                    Button("Delete tag") {
-                        deleteTag(tag)
-                    }
-                }
         })
         .dropDestination(for: UUID.self) { items, location in
             withAnimation(.linear) {
@@ -62,15 +57,7 @@ struct TagSidebarView: View {
             }
             return true
         }
-    }
-
-    private func deleteTag(_ tag: Tag) {
-        withAnimation {
-            tags.filter({ $0.parentID == tag.id }).forEach { childTag in
-                modelContext.delete(childTag)
-            }
-            modelContext.delete(tag)
-        }
+        .transition(.move(edge: .top).combined(with: .opacity))
     }
 }
 

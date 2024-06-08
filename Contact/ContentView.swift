@@ -21,6 +21,7 @@ struct ContentView: View {
     @State var searchString: String = ""
 
     @State var showCreateTag = false
+    @State var showEdit = false
 
     var body: some View {
         NavigationSplitView {
@@ -34,6 +35,13 @@ struct ContentView: View {
                     List(tags.filter({ $0.parentID == nil }), selection: $selection) { tag in
                         TagSidebarView(tag: tag, contacts: contacts)
                     }
+                }
+                Button("Edit") {
+                    showEdit.toggle()
+                }
+                .padding()
+                .popover(isPresented: $showEdit) {
+                    EditView()
                 }
             }
             .toolbar {
