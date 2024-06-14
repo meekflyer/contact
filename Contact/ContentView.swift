@@ -88,6 +88,28 @@ struct ContentView: View {
                     }
                 }
             }
+            .contextMenu(forSelectionType: CNContact.ID.self) { items in
+                Menu("Add to") {
+                    ForEach(tags) { tag in
+                        Button(tag.name) {
+                            items.forEach { id in
+                                addToTag(tag: tag, contactId: id)
+                            }
+                        }
+                    }
+                }
+                Menu("Remove from") {
+                    ForEach(tags.filter {
+                        items.isSubset(of: $0.contactIDs.compactMap({ UUID(uuidString: $0) }))
+                    }) { tag in
+                        Button(tag.name) {
+                            items.forEach { id in
+                                removeFromTag(tag: tag, contactId: id)
+                            }
+                        }
+                    }
+                }
+            }
             .searchable(text: $searchString)
             .listStyle(.plain)
             #if os(macOS)
@@ -156,6 +178,18 @@ struct ContentView: View {
         
         self.contacts = contacts
     }
+
+    func addToTag(tag: Tag, contactId: UUID) {
+        if let index = tags.firstIndex(of: tag) {
+            self.tags[index].contactIDs.insert(contactId.uuidString)
+        }
+    }
+
+    func removeFromTag(tag: Tag, contactId: UUID) {
+        if let index = tags.firstIndex(of: tag) {
+            self.tags[index].contactIDs.remove(contactId.uuidString)
+        }
+    }
 }
 
 extension CNContact: Comparable {
@@ -167,7 +201,7 @@ extension CNContact: Comparable {
 extension [CNContact] {
     func inLetterSections() -> [(Character, [CNContact])] {
         var sections: [Character : [CNContact]] = ["#" : []]
-        
+
         for contact in self {
             if let firstLetter = contact.givenName.first?.uppercased().first {
                 if firstLetter.isLetter {
@@ -193,7 +227,7 @@ extension [CNContact] {
             sections[section.key] = sections[section.key]?.sorted()
         }
         
-        return sections.sorted { $0.0 < $1.0 }
+        return sections.sorted { $0.key < $1.key }
     }
     
     func getById(_ id: UUID) -> CNContact? {
