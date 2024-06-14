@@ -47,6 +47,14 @@ extension Tag {
 
         return false
     }
+
+    func getContactIDsWithDescendents(from tags: [Tag]) -> Set<String> {
+        var allContactIDs = contactIDs
+        tags.children(of: self).forEach { child in
+            allContactIDs.formUnion(child.getContactIDsWithDescendents(from: tags))
+        }
+        return allContactIDs
+    }
 }
 
 extension [Tag] {

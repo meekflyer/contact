@@ -15,61 +15,20 @@ struct TagSidebarView: View {
     let contacts: [CNContact]
     var expandable = true
 
-    @State private var tagExpanded = false
     @State private var isTargeted = false
 
     var body: some View {
         Section(content: {
-            VStack(alignment: .leading, spacing: 5) {
-                HStack {
-                    VStack(alignment: .leading) {
-                        ForEach(tag.contactIDs.sorted(by: { lhs, rhs in
-                            let lhsContact = contacts.getById(UUID(uuidString: lhs) ?? UUID())
-                            let rhsContact = contacts.getById(UUID(uuidString: rhs) ?? UUID())
-                            if let lhsContact, let rhsContact {
-                                let lhsName = lhsContact.givenName + lhsContact.familyName
-                                let rhsName = rhsContact.givenName + rhsContact.familyName
-                                return lhsName < rhsName
-                            }
-                            return lhs < rhs
-                        }), id: \.self) { id in
-                            if let contact = contacts.getById(UUID(uuidString: id) ?? UUID()) {
-                                Text(contact.givenName + " " + contact.familyName)
-                                    .font(.callout)
-                                    .foregroundStyle(.secondary)
-                                    .draggable(contact.id)
-                            } else {
-                                if contacts.isEmpty {
-                                    Text("Loading...")
-                                        .font(.callout)
-                                        .foregroundStyle(.secondary)
-                                } else {
-                                    Text("No name")
-                                        .font(.callout)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                    }
-                    Spacer()
-                }
-                .contentShape(Rectangle())
-                .overlay {
-                    RoundedRectangle(cornerRadius: 5)
-                        .stroke(isTargeted ? .blue : .clear, lineWidth: 2)
-                }
-                ForEach(tags.children(of: tag)) { tag in
-                    TagSidebarView(tag: tag, contacts: contacts, expandable: false)
-                }
+            ForEach(tags.children(of: tag)) { tag in
+                TagSidebarView(tag: tag, contacts: contacts, expandable: false)
+                    .padding(.leading, 7.5)
             }
-            .padding(.leading, 7.5)
         }, header: {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(tag.name)
-                    .font(.subheadline)
-                    .padding(.leading, 5)
+            VStack(alignment: .leading) {
+                Text("\(tag.name) (\(tag.getContactIDsWithDescendents(from: tags).count))")
                 Divider()
             }
+            .font(.subheadline)
             .foregroundStyle(isTargeted ? .blue : .secondary)
             .fontWeight(.heavy)
             .draggable(UUID(uuidString: tag.id) ?? UUID()) {
