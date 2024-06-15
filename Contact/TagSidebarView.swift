@@ -15,22 +15,45 @@ struct TagSidebarView: View {
     let contacts: [CNContact]
     var expandable = true
 
+    @Binding var selectedTagID: String
     @State private var isTargeted = false
+    var isSelected: Bool {
+        selectedTagID == tag.id
+    }
+
 
     var body: some View {
         Section(content: {
             ForEach(tags.children(of: tag)) { tag in
-                TagSidebarView(tag: tag, contacts: contacts, expandable: false)
+                TagSidebarView(tag: tag, contacts: contacts, expandable: false, selectedTagID: $selectedTagID)
                     .padding(.leading, 7.5)
             }
         }, header: {
-            VStack(alignment: .leading) {
-                Text("\(tag.name) (\(tag.getContactIDsWithDescendents(from: tags).count))")
-                Divider()
+            ZStack {
+                HStack {
+                    Spacer()
+                }
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("\(tag.name) (\(tag.getContactIDsWithDescendents(from: tags).count))")
+                        .padding(2)
+                    Divider()
+                }
             }
+            .contentShape(Rectangle())
+            .background(
+                RoundedRectangle(cornerRadius: 5)
+                    .fill(isSelected ? Color.accentColor : Color.clear)
+            )
             .font(.subheadline)
-            .foregroundStyle(isTargeted ? .blue : .secondary)
+            .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
             .fontWeight(.heavy)
+            .onTapGesture {
+                if isSelected {
+                    selectedTagID = ""
+                } else {
+                    selectedTagID = tag.id
+                }
+            }
             .draggable(UUID(uuidString: tag.id) ?? UUID()) {
                 Text(tag.name)
             }
@@ -84,5 +107,5 @@ struct TagSidebarView: View {
 }
 
 #Preview {
-    TagSidebarView(tag: Tag(name: "Name", color: .init(red: 0, green: 0, blue: 0), parentID: nil, contactIDs: []), contacts: [])
+    TagSidebarView(tag: Tag(name: "Name", color: .init(red: 0, green: 0, blue: 0), parentID: nil, contactIDs: []), contacts: [], selectedTagID: .constant(""))
 }

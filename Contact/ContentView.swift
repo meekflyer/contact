@@ -16,8 +16,12 @@ struct ContentView: View {
     @State var openContact: CNContact?
     @State var tagNames: [String] = ["First Tag", "Second Tag"]
     
-    @State var contacts: [CNContact] = []
+    @State var allContacts: [CNContact] = []
+    @State var filteredContacts: [CNContact] = []
+
+    @State var tagSelection: String = ""
     @State private var contactSelection = Set<UUID>()
+
     @State var searchString: String = ""
 
     @State private var isRootTagTargeted = false
@@ -31,12 +35,12 @@ struct ContentView: View {
                     Text("Click the + button to create your first tag!")
                         .foregroundStyle(.secondary)
                         .padding()
-                    Spacer()
                 } else {
                     List(tags.filter({ $0.parentID == nil })) { tag in
-                        TagSidebarView(tag: tag, contacts: contacts)
+                        TagSidebarView(tag: tag, contacts: filteredContacts, selectedTagID: $tagSelection)
                     }
                 }
+                Spacer()
                 Button("Edit") {
                     showEdit.toggle()
                 }
@@ -44,6 +48,10 @@ struct ContentView: View {
                 .popover(isPresented: $showEdit) {
                     EditView()
                 }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                tagSelection = ""
             }
             .toolbar {
                 ToolbarItem {
@@ -75,7 +83,7 @@ struct ContentView: View {
             }
         } content: {
             List(selection: $contactSelection) {
-                ForEach(contacts.inLetterSections(), id: \.0) { section in
+                ForEach(filteredContacts.inLetterSections(), id: \.0) { section in
                     Section(String(section.0)) {
                         ForEach(section.1) { contact in
                             Group {
@@ -118,7 +126,7 @@ struct ContentView: View {
             #endif
         } detail: {
             Group {
-                if let id = Array(contactSelection).last, let contact = contacts.getById(id) {
+                if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {
                     ContactDetailView(contact: contact)
                 } else {
                     Text("Select an item")
@@ -131,8 +139,29 @@ struct ContentView: View {
         .task {
             await fetchContacts()
         }
+        .onChange(of: tagSelection) { oldValue, newValue in
+            filterContactsByTag(newValue)
+        }
     }
-    
+
+    private func filterContactsByTag(_ tagID: String) {
+        withAnimation {
+            if tagID == "" {
+                filteredContacts = allContacts
+                return
+            }
+
+            filteredContacts = allContacts.filter({ contact in
+                if let IDs = tags
+                    .first(where: { $0.id == tagID })?
+                    .getContactIDsWithDescendents(from: tags) {
+                    return IDs.contains(contact.id.uuidString)
+                }
+                return false
+            })
+        }
+    }
+
     private func fetchContacts() async {
         var contacts = [CNContact]()
         let keysToFetch = [
@@ -176,7 +205,8 @@ struct ContentView: View {
             print("Error fetching contacts: \(error)")
         }
         
-        self.contacts = contacts
+        self.allContacts = contacts
+        self.filteredContacts = contacts
     }
 
     func addToTag(tag: Tag, contactId: UUID) {

@@ -32,7 +32,7 @@ struct EditView: View {
                 }
             }
             .safeAreaPadding(5)
-            .frame(width: 500, height: 200)
+            .frame(width: 350, height: 200)
             .listStyle(.sidebar)
         }
     }
