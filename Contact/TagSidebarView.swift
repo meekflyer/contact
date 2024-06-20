@@ -15,17 +15,16 @@ struct TagSidebarView: View {
     let contacts: [CNContact]
     var expandable = true
 
-    @Binding var selectedTagID: String
+    @Binding var selectedTags: [Tag]
     @State private var isTargeted = false
     var isSelected: Bool {
-        selectedTagID == tag.id
+        selectedTags.contains(tag)
     }
-
 
     var body: some View {
         Section(content: {
             ForEach(tags.children(of: tag)) { tag in
-                TagSidebarView(tag: tag, contacts: contacts, expandable: false, selectedTagID: $selectedTagID)
+                TagSidebarView(tag: tag, contacts: contacts, expandable: false, selectedTags: $selectedTags)
                     .padding(.leading, 7.5)
             }
         }, header: {
@@ -48,10 +47,10 @@ struct TagSidebarView: View {
             .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
             .fontWeight(.heavy)
             .onTapGesture {
-                if isSelected {
-                    selectedTagID = ""
+                if selectedTags.contains(tag) {
+                    selectedTags.removeAll(where: { $0.id == tag.id })
                 } else {
-                    selectedTagID = tag.id
+                    selectedTags.append(tag)
                 }
             }
             .draggable(UUID(uuidString: tag.id) ?? UUID()) {
@@ -107,5 +106,5 @@ struct TagSidebarView: View {
 }
 
 #Preview {
-    TagSidebarView(tag: Tag(name: "Name", color: .init(red: 0, green: 0, blue: 0), parentID: nil, contactIDs: []), contacts: [], selectedTagID: .constant(""))
+    TagSidebarView(tag: Tag(name: "Name", color: .init(red: 0, green: 0, blue: 0), parentID: nil, contactIDs: []), contacts: [], selectedTags: .constant([]))
 }

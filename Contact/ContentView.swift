@@ -19,10 +19,13 @@ struct ContentView: View {
     @State var allContacts: [CNContact] = []
     @State var filteredContacts: [CNContact] = []
 
-    @State var tagSelection: String = ""
     @State private var contactSelection = Set<UUID>()
 
     @State var searchString: String = ""
+    @State private var currentTokens = [Tag]()
+    var suggestedTokens: [Tag] {
+        tags
+    }
 
     @State private var isRootTagTargeted = false
     @State var showCreateTag = false
@@ -37,7 +40,7 @@ struct ContentView: View {
                         .padding()
                 } else {
                     List(tags.filter({ $0.parentID == nil })) { tag in
-                        TagSidebarView(tag: tag, contacts: filteredContacts, selectedTagID: $tagSelection)
+                        TagSidebarView(tag: tag, contacts: filteredContacts, selectedTags: $currentTokens)
                     }
                 }
                 Spacer()
@@ -50,9 +53,6 @@ struct ContentView: View {
                 }
             }
             .contentShape(Rectangle())
-            .onTapGesture {
-                tagSelection = ""
-            }
             .toolbar {
                 ToolbarItem {
                     Button(action: { showCreateTag.toggle() }) {
@@ -118,7 +118,25 @@ struct ContentView: View {
                     }
                 }
             }
-            .searchable(text: $searchString)
+            .searchable(text: $searchString, tokens: $currentTokens, token: { tag in
+                Text(tag.name)
+            })
+            .searchSuggestions {
+                if searchString.starts(with: "#") {
+                    ForEach(tags) { tag in
+                        Text(tag.name).searchCompletion(tag)
+                    }
+                } else {
+                    ForEach(filteredContacts.filter { contact in
+                        String(describing: contact)
+                            .lowercased()
+                            .contains(searchString.lowercased())
+                    }) { filteredContact in
+                        Text("\(filteredContact.givenName) \(filteredContact.familyName)")
+                            .searchCompletion("\(filteredContact.givenName) \(filteredContact.familyName)")
+                    }
+                }
+            }
             .listStyle(.plain)
             #if os(macOS)
             .navigationSplitViewColumnWidth(min: 180, ideal: 200)
@@ -139,26 +157,25 @@ struct ContentView: View {
         .task {
             await fetchContacts()
         }
-        .onChange(of: tagSelection) { oldValue, newValue in
-            filterContactsByTag(newValue)
+        .onChange(of: currentTokens) { _, _ in
+            filterContactsByTags()
         }
     }
 
-    private func filterContactsByTag(_ tagID: String) {
-        withAnimation {
-            if tagID == "" {
-                filteredContacts = allContacts
-                return
+    private func filterContactsByTags() {
+        let filteredContactIds = Set<String>(
+            currentTokens.flatMap { tag in
+                tag.getContactIDsWithDescendents(from: tags)
             }
-
-            filteredContacts = allContacts.filter({ contact in
-                if let IDs = tags
-                    .first(where: { $0.id == tagID })?
-                    .getContactIDsWithDescendents(from: tags) {
-                    return IDs.contains(contact.id.uuidString)
+        )
+        withAnimation {
+            if filteredContactIds.isEmpty {
+                filteredContacts = allContacts
+            } else {
+                filteredContacts = allContacts.filter { contact in
+                    filteredContactIds.contains(contact.id.uuidString)
                 }
-                return false
-            })
+            }
         }
     }
 
