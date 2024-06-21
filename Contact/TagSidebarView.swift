@@ -12,51 +12,27 @@ import Contacts
 struct TagSidebarView: View {
     @Query private var tags: [Tag]
     let tag: Tag
-    let contacts: [CNContact]
-    var expandable = true
 
     @Binding var selectedTags: [Tag]
     @State private var isTargeted = false
-    var isSelected: Bool {
-        selectedTags.contains(tag)
-    }
 
     var body: some View {
-        Section(content: {
-            ForEach(tags.children(of: tag)) { tag in
-                TagSidebarView(tag: tag, contacts: contacts, expandable: false, selectedTags: $selectedTags)
-                    .padding(.leading, 7.5)
+        Group {
+            if tags.children(of: tag).isEmpty {
+                header
+            } else {
+                DisclosureGroup(
+                    content: {
+                        ForEach(tags.children(of: tag), id: \.uuid) { tag in
+                            TagSidebarView(tag: tag, selectedTags: $selectedTags)
+                        }
+                    },
+                    label: {
+                        header
+                    }
+                )
             }
-        }, header: {
-            ZStack {
-                HStack {
-                    Spacer()
-                }
-                VStack(alignment: .leading, spacing: 0) {
-                    Text("\(tag.name) (\(tag.getContactIDsWithDescendents(from: tags).count))")
-                        .padding(2)
-                    Divider()
-                }
-            }
-            .contentShape(Rectangle())
-            .background(
-                RoundedRectangle(cornerRadius: 5)
-                    .fill(isSelected ? Color.accentColor : Color.clear)
-            )
-            .font(.subheadline)
-            .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
-            .fontWeight(.heavy)
-            .onTapGesture {
-                if selectedTags.contains(tag) {
-                    selectedTags.removeAll(where: { $0.id == tag.id })
-                } else {
-                    selectedTags.append(tag)
-                }
-            }
-            .draggable(UUID(uuidString: tag.id) ?? UUID()) {
-                Text(tag.name)
-            }
-        })
+        }
         .dropDestination(for: UUID.self, action: { items, _ in
             if items.count == 1, let draggedID = items.first, let tagIndex = tags.firstIndex(where: { $0.id == draggedID.uuidString }) {
                 // This is a tag
@@ -72,6 +48,16 @@ struct TagSidebarView: View {
             self.isTargeted = isTargeted
         })
         .transition(.move(edge: .top).combined(with: .opacity))
+    }
+
+    var header: some View {
+        Group {
+            Text("\(tag.name)").bold() + Text(" (\(tag.getContactIDsWithDescendents(from: tags).count))")
+        }
+        .foregroundStyle(isTargeted ? Color.accentColor : .secondary)
+        .draggable(tag.uuid) {
+            Text(tag.name)
+        }
     }
 
     private func dropTag(droppedIndex tagIndex: Array<Tag>.Index, onto tag: Tag) async -> Bool {
@@ -106,5 +92,5 @@ struct TagSidebarView: View {
 }
 
 #Preview {
-    TagSidebarView(tag: Tag(name: "Name", color: .init(red: 0, green: 0, blue: 0), parentID: nil, contactIDs: []), contacts: [], selectedTags: .constant([]))
+    TagSidebarView(tag: Tag(name: "Name", color: .init(red: 0, green: 0, blue: 0), parentID: nil, contactIDs: []), selectedTags: .constant([]))
 }

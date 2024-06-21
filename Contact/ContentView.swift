@@ -17,7 +17,8 @@ struct ContentView: View {
     
     @State var allContacts: [CNContact] = []
     @State var filteredContacts: [CNContact] = []
-
+    
+    @State var tagSelection = Set<UUID>()
     @State private var contactSelection = Set<UUID>()
 
     @State var searchString: String = ""
@@ -38,17 +39,21 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                         .padding()
                 } else {
-                    List(tags.filter({ $0.parentID == nil })) { tag in
-                        TagSidebarView(tag: tag, contacts: filteredContacts, selectedTags: $currentTokens)
+                    List(selection: $tagSelection) {
+                        ForEach(tags.filter({ $0.parentID == nil }), id: \.uuid) { tag in
+                            TagSidebarView(tag: tag, selectedTags: $currentTokens)
+                        }
                     }
                 }
-                Spacer()
-                Button("Edit") {
-                    showEdit.toggle()
-                }
-                .padding()
-                .popover(isPresented: $showEdit) {
-                    EditView()
+                VStack {
+                    Spacer()
+                    Button("Edit") {
+                        showEdit.toggle()
+                    }
+                    .padding()
+                    .popover(isPresented: $showEdit) {
+                        EditView()
+                    }
                 }
             }
             .contentShape(Rectangle())
@@ -79,6 +84,9 @@ struct ContentView: View {
             .overlay {
                 RoundedRectangle(cornerRadius: 10)
                     .stroke(isRootTagTargeted ? .blue : .clear, lineWidth: 2)
+            }
+            .onTapGesture {
+                currentTokens = []
             }
         } content: {
             List(selection: $contactSelection) {
@@ -158,21 +166,27 @@ struct ContentView: View {
         .onChange(of: searchString) { _, _ in
             filterContactsBySearchString()
         }
+        .onChange(of: tagSelection) { _, newValue in
+            currentTokens = tags.filter { newValue.contains($0.uuid) }
+        }
+        .onChange(of: currentTokens) { _, newValue in
+            tagSelection = Set(newValue.map { $0.uuid })
+        }
     }
 
     private func filterContactsByTags() {
+        guard !currentTokens.isEmpty else {
+            filteredContacts = allContacts
+            return
+        }
         let filteredContactIds = Set<String>(
             currentTokens.flatMap { tag in
                 tag.getContactIDsWithDescendents(from: tags)
             }
         )
         withAnimation {
-            if filteredContactIds.isEmpty {
-                filteredContacts = allContacts
-            } else {
-                filteredContacts = allContacts.filter { contact in
-                    filteredContactIds.contains(contact.id.uuidString)
-                }
+            filteredContacts = allContacts.filter { contact in
+                filteredContactIds.contains(contact.id.uuidString)
             }
         }
     }

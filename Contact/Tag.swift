@@ -9,12 +9,15 @@ import SwiftUI
 import SwiftData
 
 @Model
-final class Tag {
+final class Tag: Identifiable {
     @Attribute(.unique) let id: String
     var name: String
     private var color: String
     var parentID: String?
     var contactIDs: Set<String>
+    var uuid: UUID {
+        UUID(uuidString: id) ?? UUID()
+    }
 
     init(name: String, color: Color.Resolved, parentID: String? = nil, contactIDs: Set<String> = []) {
         self.id = UUID().uuidString
