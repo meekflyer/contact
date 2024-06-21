@@ -12,8 +12,7 @@ import Contacts
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var tags: [Tag]
-    
-    @State var openContact: CNContact?
+
     @State var tagNames: [String] = ["First Tag", "Second Tag"]
     
     @State var allContacts: [CNContact] = []
@@ -127,11 +126,7 @@ struct ContentView: View {
                         Text(tag.name).searchCompletion(tag)
                     }
                 } else {
-                    ForEach(filteredContacts.filter { contact in
-                        String(describing: contact)
-                            .lowercased()
-                            .contains(searchString.lowercased())
-                    }) { filteredContact in
+                    ForEach(filteredContacts) { filteredContact in
                         Text("\(filteredContact.givenName) \(filteredContact.familyName)")
                             .searchCompletion("\(filteredContact.givenName) \(filteredContact.familyName)")
                     }
@@ -160,6 +155,9 @@ struct ContentView: View {
         .onChange(of: currentTokens) { _, _ in
             filterContactsByTags()
         }
+        .onChange(of: searchString) { _, _ in
+            filterContactsBySearchString()
+        }
     }
 
     private func filterContactsByTags() {
@@ -174,6 +172,23 @@ struct ContentView: View {
             } else {
                 filteredContacts = allContacts.filter { contact in
                     filteredContactIds.contains(contact.id.uuidString)
+                }
+            }
+        }
+    }
+
+    private func filterContactsBySearchString() {
+        filterContactsByTags()
+        if !searchString.isEmpty {
+            withAnimation {
+                filteredContacts = filteredContacts.filter { contact in
+                    (String(describing: contact) + "\(contact.givenName) \(contact.familyName))")
+                        .lowercased()
+                        .contains(searchString.lowercased())
+                }
+                if filteredContacts.count == 1, let first = filteredContacts.first {
+                    contactSelection.removeAll()
+                    contactSelection.insert(first.id)
                 }
             }
         }
