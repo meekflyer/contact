@@ -34,16 +34,18 @@ struct TagSidebarView: View {
             }
         }
         .dropDestination(for: UUID.self, action: { items, _ in
-            if items.count == 1, let draggedID = items.first, let tagIndex = tags.firstIndex(where: { $0.id == draggedID.uuidString }) {
-                // This is a tag
-                Task {
-                    await dropTag(droppedIndex: tagIndex, onto: tag)
+            if Set(items).isSubset(of: tags.map { $0.uuid }) {
+                // These are tags
+                items.forEach { tagId in
+                    Task {
+                        if let tagIndex = tags.firstIndex(where: { $0.uuid == tagId }) {
+                            return await dropTag(droppedIndex: tagIndex, onto: tag)
+                        }
+                        return true
+                    }
                 }
-                return true
-            } else {
-                // This is an array of contacts
-                return dropItems(items: items)
             }
+            return false
         }, isTargeted: { isTargeted in
             self.isTargeted = isTargeted
         })
@@ -59,7 +61,8 @@ struct TagSidebarView: View {
             Text(tag.name)
         }
     }
-
+    
+    @MainActor
     private func dropTag(droppedIndex tagIndex: Array<Tag>.Index, onto tag: Tag) async -> Bool {
         if !tag.isDescendent(of: tags[tagIndex], in: tags) {
             if tags.indices.contains(tagIndex) {

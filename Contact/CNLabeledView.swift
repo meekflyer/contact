@@ -40,6 +40,7 @@ struct LabeledView: View {
             .frame(width: 150)
             VStack(alignment: .leading) {
                 value
+                    .textSelection(.enabled)
                 Spacer()
             }
             Spacer()
@@ -89,7 +90,7 @@ struct CNLabeledView<T>: View where T:NSCopying, T:NSSecureCoding {
     @ViewBuilder
     func getLink() -> some View {
         if type == .phoneNumber, let phoneNumber = value as? CNLabeledValue<CNPhoneNumber> {
-            if let URL = URL(string: "tel://\(phoneNumber.value.stringValue)") {
+            if let URL = URL(string: "tel:\(phoneNumber.value.stringValue)") {
                 Link(phoneNumber.value.stringValue, destination: URL)
             } else {
                 Text(phoneNumber.value.stringValue)
