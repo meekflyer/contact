@@ -32,7 +32,7 @@ struct ContactDetailView: View {
                     .clipShape(Circle())
                     .padding()
                     .shadow(radius: 2)
-                Text("\(contact.givenName) \(contact.familyName)")
+                Text(contact.fullName)
                     .font(.largeTitle)
                     .bold()
                 Spacer()

@@ -26,10 +26,11 @@ struct ContentView: View {
     var suggestedTokens: [Tag] {
         tags
     }
-
+    
+    @State private var targetedContactId: UUID?
     @State private var isRootTagTargeted = false
-    @State var showCreateTag = false
-    @State var showEdit = false
+    @State private var showCreateTag = false
+    @State private var showEdit = false
 
     var body: some View {
         NavigationSplitView {
@@ -73,9 +74,13 @@ struct ContentView: View {
             .navigationSplitViewColumnWidth(min: 175, ideal: 175)
             #endif
             .dropDestination(for: UUID.self, action: { items, _ in
-                if items.count == 1, let draggedID = items.first, let tagIndex = tags.firstIndex(where: { $0.id == draggedID.uuidString }) {
-                    // This is a tag
-                    tags[tagIndex].parentID = nil
+                if Set(items).isSubset(of: tags.map { $0.uuid }) {
+                    // These are tags
+                    items.forEach { tagId in
+                        if let tagIndex = tags.firstIndex(where: { $0.uuid == tagId }) {
+                            tags[tagIndex].parentID = nil
+                        }
+                    }
                 }
                 return false
             }, isTargeted: { isTargeted in
@@ -96,9 +101,11 @@ struct ContentView: View {
                             Group {
                                 Text(contact.givenName).bold() + Text(" ") + Text(contact.familyName)
                             }
+                            .foregroundStyle(targetedContactId == contact.id ? Color.accentColor : Color.primary)
                             .draggable(contact.id) {
-                                Text("\(contact.givenName) \(contact.familyName)")
+                                Text(contact.fullName)
                             }
+                            .dropDestinationForTags(tags: tags, contact: contact, targetedContactId: $targetedContactId)
                         }
                     }
                 }
@@ -135,8 +142,8 @@ struct ContentView: View {
                     }
                 } else {
                     ForEach(filteredContacts) { filteredContact in
-                        Text("\(filteredContact.givenName) \(filteredContact.familyName)")
-                            .searchCompletion("\(filteredContact.givenName) \(filteredContact.familyName)")
+                        Text(filteredContact.fullName)
+                            .searchCompletion(filteredContact.fullName)
                     }
                 }
             }
@@ -196,7 +203,7 @@ struct ContentView: View {
         if !searchString.isEmpty {
             withAnimation {
                 filteredContacts = filteredContacts.filter { contact in
-                    (String(describing: contact) + "\(contact.givenName) \(contact.familyName))")
+                    (String(describing: contact) + contact.fullName)
                         .lowercased()
                         .contains(searchString.lowercased())
                 }
@@ -272,6 +279,10 @@ extension CNContact: Comparable {
     public static func < (lhs: CNContact, rhs: CNContact) -> Bool {
         lhs.givenName < rhs.givenName
     }
+
+    var fullName: String {
+        "\(givenName) \(familyName)"
+    }
 }
 
 extension [CNContact] {
@@ -314,6 +325,33 @@ extension [CNContact] {
 extension UUID: Transferable {
     public static var transferRepresentation: some TransferRepresentation {
         CodableRepresentation(contentType: .text)
+    }
+}
+
+extension View {
+    func test() -> some View {
+        self
+    }
+
+    func dropDestinationForTags(tags: [Tag], contact: CNContact, targetedContactId: Binding<UUID?>) -> some View {
+        self.dropDestination(for: UUID.self, action: { items, _ in
+            if Set(items).isSubset(of: tags.map { $0.uuid }) {
+                // These are tags
+                items.forEach { tagId in
+                    if let tagIndex = tags.firstIndex(where: { $0.uuid == tagId }) {
+                        tags[tagIndex].contactIDs.insert(contact.id.uuidString)
+                    }
+                }
+                return true
+            }
+            return false
+        }, isTargeted: { isTargeted in
+            if isTargeted {
+                targetedContactId.wrappedValue = contact.id
+            } else {
+                targetedContactId.wrappedValue = nil
+            }
+        })
     }
 }
 
