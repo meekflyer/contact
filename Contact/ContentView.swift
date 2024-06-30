@@ -42,7 +42,7 @@ struct ContentView: View {
                 } else {
                     List(selection: $tagSelection) {
                         ForEach(tags.filter({ $0.parentID == nil }), id: \.uuid) { tag in
-                            TagSidebarView(tag: tag, selectedTags: $currentTokens)
+                            TagSidebarView(tag: tag, allContacts: $allContacts)
                         }
                     }
                 }
