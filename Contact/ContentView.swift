@@ -31,6 +31,7 @@ struct ContentView: View {
     @State private var isRootTagTargeted = false
     @State private var showCreateTag = false
     @State private var showEdit = false
+    @State private var showMap = false
 
     var body: some View {
         NavigationSplitView {
@@ -158,6 +159,13 @@ struct ContentView: View {
                     ContactDetailView(contact: contact)
                 } else {
                     Text("Select an item")
+                }
+            }
+            .toolbar {
+                ToolbarItem {
+                    Button(action: { showMap.toggle() }) {
+                        Image(systemName: showMap ? "map.fill" : "map")
+                    }
                 }
             }
             #if os(macOS)
