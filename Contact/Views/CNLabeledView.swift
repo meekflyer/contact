@@ -75,7 +75,8 @@ struct CNLabeledView<T>: View where T:NSCopying, T:NSSecureCoding {
                     .cnLabel()
             }
         } else if type == .address, let address = value as? CNLabeledValue<CNPostalAddress> {
-            if let label = address.label { Text(CNLabeledValue<T>.localizedString(forLabel: label))
+            if let label = address.label {
+                Text(CNLabeledValue<T>.localizedString(forLabel: label))
                     .cnLabel()
             } else {
                 Text("address")

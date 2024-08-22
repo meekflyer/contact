@@ -6,7 +6,6 @@
 //
 
 import Contacts
-import MapKit
 import SwiftData
 import SwiftUI
 
@@ -156,17 +155,21 @@ struct ContentView: View {
             #endif
         } detail: {
             Group {
-                if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {
+                if showMap {
+                    ContactMapView(contacts: contactSelection.compactMap({ id in
+                        filteredContacts.getById(id)
+                    }))
+                    .transition(.move(edge: .top))
+                }
+                else if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {
                     ContactDetailView(contact: contact)
-                } else if showMap {
-                    Map()
                 } else {
                     Text("Select an item")
                 }
             }
             .toolbar {
                 ToolbarItem {
-                    Button(action: { showMap.toggle() }) {
+                    Button(action: { withAnimation { showMap.toggle() } }) {
                         Label("Show map", systemImage: showMap ? "map.fill" : "map")
                     }
                 }
