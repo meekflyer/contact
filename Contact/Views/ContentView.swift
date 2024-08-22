@@ -5,9 +5,10 @@
 //  Created by Thomas Patrick on 5/20/24.
 //
 
-import SwiftUI
-import SwiftData
 import Contacts
+import MapKit
+import SwiftData
+import SwiftUI
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -157,6 +158,8 @@ struct ContentView: View {
             Group {
                 if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {
                     ContactDetailView(contact: contact)
+                } else if showMap {
+                    Map()
                 } else {
                     Text("Select an item")
                 }
@@ -164,7 +167,7 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem {
                     Button(action: { showMap.toggle() }) {
-                        Image(systemName: showMap ? "map.fill" : "map")
+                        Label("Show map", systemImage: showMap ? "map.fill" : "map")
                     }
                 }
             }
