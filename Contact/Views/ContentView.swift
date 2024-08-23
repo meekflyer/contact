@@ -156,9 +156,11 @@ struct ContentView: View {
         } detail: {
             Group {
                 if showMap {
-                    ContactMapView(contacts: contactSelection.compactMap({ id in
-                        filteredContacts.getById(id)
-                    }))
+                    ContactMapView(contacts: .init(get: {
+                        contactSelection.compactMap({ id in
+                            filteredContacts.getById(id)
+                        })
+                    }, set: { _ in }))
                     .transition(.move(edge: .top))
                 }
                 else if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {

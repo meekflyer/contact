@@ -56,33 +56,60 @@ extension CNPostalAddress {
 }
 
 struct ContactMapView: View {
-    let contacts: [CNContact]
+    let contacts: Binding<[CNContact]>
     @State private var contactMapItems = [ContactMapItem]()
+    @State private var loading = false
 
     var body: some View {
-        Map() {
-            UserAnnotation()
-            ForEach(contactMapItems, id: \.self) { contactMapItem in
-                Marker(contactMapItem.title,
-                       systemImage: contactMapItem.imageName,
-                       coordinate: contactMapItem.coordinate)
+        ZStack(alignment: .topTrailing) {
+            Map() {
+                UserAnnotation()
+                ForEach(contactMapItems, id: \.self) { contactMapItem in
+                    Marker(contactMapItem.title,
+                           systemImage: contactMapItem.imageName,
+                           coordinate: contactMapItem.coordinate)
+                }
+            }
+            
+            if loading {
+                ProgressView()
+                    .frame(width: 10)
+                    .padding()
             }
         }
         .task {
-            var items = [ContactMapItem]()
-            for contact in contacts {
-                for address in contact.postalAddresses {
-                    if let item = await ContactMapItem(name: contact.givenName,
-                                                       address: address) {
-                        items.append(item)
-                    }
+            await updateMapItems()
+        }
+        .onChange(of: contacts.wrappedValue) { _, _ in
+            Task {
+                await updateMapItems()
+            }
+        }
+    }
+
+    func updateMapItems() async {
+        await MainActor.run {
+            loading = true
+        }
+        var items = [ContactMapItem]()
+        for contact in contacts.wrappedValue {
+            for address in contact.postalAddresses {
+                if let item = await ContactMapItem(name: contact.givenName,
+                                                   address: address) {
+                    items.append(item)
                 }
             }
-            contactMapItems = items
+        }
+        let updateItems = items
+        await MainActor.run {
+            withAnimation {
+                contactMapItems = updateItems
+                loading = false
+            }
         }
     }
 }
 
 #Preview {
-    ContactMapView(contacts: [CNContact()])
+    ContactMapView(contacts: .constant([CNContact()]))
 }
