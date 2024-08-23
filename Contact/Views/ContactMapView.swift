@@ -23,7 +23,12 @@ struct ContactMapItem: Hashable {
             }
             self.title = name + " " + (label ?? "")
             self.coordinate = coordinate
-            self.imageName = "figure"
+            self.imageName = switch label {
+            case "home": "house.fill"
+            case "work": "building.2.fill"
+            case "school": "graduationcap.fill"
+            default: "figure"
+            }
             self.address = address
         } else {
             return nil
