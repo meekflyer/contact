@@ -33,20 +33,26 @@ struct ContentView: View {
     @State private var showCreateTag = false
     @State private var showEdit = false
     @State private var showMap = false
+    @State private var loading = false
 
     var body: some View {
         NavigationSplitView {
             leftBar
         } content: {
-            middleBar
+            if loading {
+                ProgressView()
+            } else {
+                middleBar
+            }
         } detail: {
             rightBar
         }
         .task {
             await fetchContacts()
         }
-        .onChange(of: currentTokens) { _, _ in
+        .onChange(of: currentTokens) { _, newValue in
             filterContactsByTags()
+            tagSelection = Set(newValue.map { $0.uuid })
         }
         .onChange(of: searchString) { _, _ in
             filterContactsBySearchString()
@@ -54,48 +60,74 @@ struct ContentView: View {
         .onChange(of: tagSelection) { _, newValue in
             currentTokens = tags.filter { newValue.contains($0.uuid) }
         }
-        .onChange(of: currentTokens) { _, newValue in
-            tagSelection = Set(newValue.map { $0.uuid })
-        }
     }
 
     private var leftBar: some View {
         VStack {
             if !lists.isEmpty {
-                Text("Lists")
+                VStack {
+                    Text("Lists")
+                        .font(.title2)
+                        .bold()
+                    Text("Create and edit Lists in the default Contacts app")
+                        .font(.caption2)
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                    List(selection: $tagSelection) {
+                        ForEach(lists) { list in
+                            Group {
+                                Text("\(list.name)").bold() + Text(" (\(list.contactIds.count))")
+                            }
+                            .tag(list.contactIds)
+                        }
+                    }
+                    .frame(maxHeight: 100)
+                }
+                .transition(.slide)
+            }
+            VStack {
+                Text("Tags")
                     .font(.title2)
                     .bold()
-                List {
-                    ForEach(lists) { list in
-                        Group {
-                            Text("\(list.name)").bold() + Text(" (\(list.contactIds.count))")
+                if tags.isEmpty {
+                    Text("Click the + button to create your first tag!")
+                        .foregroundStyle(.secondary)
+                        .padding()
+                } else {
+                    List(selection: $tagSelection) {
+                        ForEach(tags.filter({ $0.parentID == nil }), id: \.uuid) { tag in
+                            TagSidebarView(tag: tag, allContacts: $allContacts)
                         }
                     }
                 }
-            }
-            Text("Tags")
-                .font(.title2)
-                .bold()
-            if tags.isEmpty {
-                Text("Click the + button to create your first tag!")
-                    .foregroundStyle(.secondary)
+                VStack {
+                    Spacer()
+                    Button("Edit") {
+                        showEdit.toggle()
+                    }
                     .padding()
-            } else {
-                List(selection: $tagSelection) {
-                    ForEach(tags.filter({ $0.parentID == nil }), id: \.uuid) { tag in
-                        TagSidebarView(tag: tag, allContacts: $allContacts)
+                    .popover(isPresented: $showEdit) {
+                        EditView()
                     }
                 }
             }
-            VStack {
-                Spacer()
-                Button("Edit") {
-                    showEdit.toggle()
+            .dropDestination(for: UUID.self, action: { items, _ in
+                if Set(items).isSubset(of: tags.map { $0.uuid }) {
+                    // These are tags
+                    items.forEach { tagId in
+                        if let tagIndex = tags.firstIndex(where: { $0.uuid == tagId }) {
+                            tags[tagIndex].parentID = nil
+                        }
+                    }
                 }
-                .padding()
-                .popover(isPresented: $showEdit) {
-                    EditView()
-                }
+                return false
+            }, isTargeted: { isTargeted in
+                self.isRootTagTargeted = isTargeted
+            })
+            .overlay {
+                RoundedRectangle(cornerRadius: 10)
+                    .stroke(isRootTagTargeted ? .blue : .clear, lineWidth: 2)
             }
         }
         .contentShape(Rectangle())
@@ -114,23 +146,6 @@ struct ContentView: View {
         #if os(macOS)
         .navigationSplitViewColumnWidth(min: 175, ideal: 175)
         #endif
-        .dropDestination(for: UUID.self, action: { items, _ in
-            if Set(items).isSubset(of: tags.map { $0.uuid }) {
-                // These are tags
-                items.forEach { tagId in
-                    if let tagIndex = tags.firstIndex(where: { $0.uuid == tagId }) {
-                        tags[tagIndex].parentID = nil
-                    }
-                }
-            }
-            return false
-        }, isTargeted: { isTargeted in
-            self.isRootTagTargeted = isTargeted
-        })
-        .overlay {
-            RoundedRectangle(cornerRadius: 10)
-                .stroke(isRootTagTargeted ? .blue : .clear, lineWidth: 2)
-        }
         .onTapGesture {
             currentTokens = []
         }
@@ -259,6 +274,9 @@ struct ContentView: View {
     }
 
     private func fetchContacts() async {
+        await MainActor.run {
+            self.loading = true
+        }
         var contacts = [CNContact]()
         let keysToFetch = [
             CNContactNamePrefixKey,
@@ -314,9 +332,15 @@ struct ContentView: View {
         } catch {
             print("Error fetching contacts: \(error)")
         }
-        
-        self.allContacts = contacts
-        self.filteredContacts = contacts
+
+        let fetchedContacts = contacts
+        await MainActor.run {
+            withAnimation(.bouncy) {
+                self.allContacts = fetchedContacts
+                self.filteredContacts = fetchedContacts
+                self.loading = false
+            }
+        }
     }
 
     func addToTag(tag: Tag, contactId: UUID) {
