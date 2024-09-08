@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		9A0728132C8D6C2000EE776A /* List.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A0728122C8D6C1F00EE776A /* List.swift */; };
 		9A54F5722C76D563005CF6F9 /* ContactMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A54F5712C76D563005CF6F9 /* ContactMapView.swift */; };
 		9A5790BC2BFC223A00F643DB /* ContactApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790BB2BFC223A00F643DB /* ContactApp.swift */; };
 		9A5790BE2BFC223A00F643DB /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A5790BD2BFC223A00F643DB /* ContentView.swift */; };
@@ -21,6 +22,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9A0728122C8D6C1F00EE776A /* List.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = List.swift; sourceTree = "<group>"; };
 		9A54F5712C76D563005CF6F9 /* ContactMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactMapView.swift; sourceTree = "<group>"; };
 		9A5790B82BFC223A00F643DB /* Contact.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Contact.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		9A5790BB2BFC223A00F643DB /* ContactApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactApp.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 			isa = PBXGroup;
 			children = (
 				9A5790BF2BFC223A00F643DB /* Tag.swift */,
+				9A0728122C8D6C1F00EE776A /* List.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -189,6 +192,7 @@
 				9A5790CD2BFC514700F643DB /* ContactDetailView.swift in Sources */,
 				9AB781FA2C116267009586B8 /* TagSidebarView.swift in Sources */,
 				9A9AD94E2C14CBFA0000C610 /* EditView.swift in Sources */,
+				9A0728132C8D6C2000EE776A /* List.swift in Sources */,
 				9A5790BE2BFC223A00F643DB /* ContentView.swift in Sources */,
 				9A5790C02BFC223A00F643DB /* Tag.swift in Sources */,
 				9AB781F82C1147DF009586B8 /* CreateTagView.swift in Sources */,

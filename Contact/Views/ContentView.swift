@@ -13,11 +13,12 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var tags: [Tag]
 
-    @State var tagNames: [String] = ["First Tag", "Second Tag"]
+    @State var tagNames: [String] = []
     
     @State var allContacts: [CNContact] = []
     @State var filteredContacts: [CNContact] = []
-    
+    @State var lists: [ContactList] = []
+
     @State var tagSelection = Set<UUID>()
     @State private var contactSelection = Set<UUID>()
 
@@ -60,6 +61,21 @@ struct ContentView: View {
 
     private var leftBar: some View {
         VStack {
+            if !lists.isEmpty {
+                Text("Lists")
+                    .font(.title2)
+                    .bold()
+                List {
+                    ForEach(lists) { list in
+                        Group {
+                            Text("\(list.name)").bold() + Text(" (\(list.contactIds.count))")
+                        }
+                    }
+                }
+            }
+            Text("Tags")
+                .font(.title2)
+                .bold()
             if tags.isEmpty {
                 Text("Click the + button to create your first tag!")
                     .foregroundStyle(.secondary)
@@ -276,10 +292,24 @@ struct ContentView: View {
         ] as [CNKeyDescriptor]
         let request = CNContactFetchRequest(keysToFetch: keysToFetch)
         let contactStore = CNContactStore()
-        
+
         do {
             try contactStore.enumerateContacts(with: request) { contact, _ in
                 contacts.append(contact)
+            }
+            try contactStore.groups(matching: nil).forEach { group in
+                let predicate = CNContact.predicateForContactsInGroup(
+                    withIdentifier: group.identifier
+                )
+                let contactsInGroup = try contactStore.unifiedContacts(
+                    matching: predicate,
+                    keysToFetch: [CNContactIdentifierKey as CNKeyDescriptor]
+                )
+                lists.append(ContactList(
+                    id: group.identifier,
+                    name: group.name,
+                    contactIds: Set(contactsInGroup.map { $0.id })
+                ))
             }
         } catch {
             print("Error fetching contacts: \(error)")
@@ -356,10 +386,6 @@ extension UUID: Transferable {
 }
 
 extension View {
-    func test() -> some View {
-        self
-    }
-
     func dropDestinationForTags(tags: [Tag], contact: CNContact, targetedContactId: Binding<UUID?>) -> some View {
         self.dropDestination(for: UUID.self, action: { items, _ in
             if Set(items).isSubset(of: tags.map { $0.uuid }) {
