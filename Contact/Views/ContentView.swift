@@ -35,150 +35,11 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            VStack {
-                if tags.isEmpty {
-                    Text("Click the + button to create your first tag!")
-                        .foregroundStyle(.secondary)
-                        .padding()
-                } else {
-                    List(selection: $tagSelection) {
-                        ForEach(tags.filter({ $0.parentID == nil }), id: \.uuid) { tag in
-                            TagSidebarView(tag: tag, allContacts: $allContacts)
-                        }
-                    }
-                }
-                VStack {
-                    Spacer()
-                    Button("Edit") {
-                        showEdit.toggle()
-                    }
-                    .padding()
-                    .popover(isPresented: $showEdit) {
-                        EditView()
-                    }
-                }
-            }
-            .contentShape(Rectangle())
-            .toolbar {
-                ToolbarItem {
-                    Button(action: { showCreateTag.toggle() }) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                    .popover(isPresented: $showCreateTag, arrowEdge: .bottom) {
-                        CreateTagView(closeView: {
-                            showCreateTag = false
-                        })
-                    }
-                }
-            }
-            #if os(macOS)
-            .navigationSplitViewColumnWidth(min: 175, ideal: 175)
-            #endif
-            .dropDestination(for: UUID.self, action: { items, _ in
-                if Set(items).isSubset(of: tags.map { $0.uuid }) {
-                    // These are tags
-                    items.forEach { tagId in
-                        if let tagIndex = tags.firstIndex(where: { $0.uuid == tagId }) {
-                            tags[tagIndex].parentID = nil
-                        }
-                    }
-                }
-                return false
-            }, isTargeted: { isTargeted in
-                self.isRootTagTargeted = isTargeted
-            })
-            .overlay {
-                RoundedRectangle(cornerRadius: 10)
-                    .stroke(isRootTagTargeted ? .blue : .clear, lineWidth: 2)
-            }
-            .onTapGesture {
-                currentTokens = []
-            }
+            leftBar
         } content: {
-            List(selection: $contactSelection) {
-                ForEach(filteredContacts.inLetterSections(), id: \.0) { section in
-                    Section(String(section.0)) {
-                        ForEach(section.1) { contact in
-                            Group {
-                                Text(contact.givenName).bold() + Text(" ") + Text(contact.familyName)
-                            }
-                            .foregroundStyle(targetedContactId == contact.id ? Color.accentColor : Color.primary)
-                            .draggable(contact.id) {
-                                Text(contact.fullName)
-                            }
-                            .dropDestinationForTags(tags: tags, contact: contact, targetedContactId: $targetedContactId)
-                        }
-                    }
-                }
-            }
-            .contextMenu(forSelectionType: CNContact.ID.self) { items in
-                Menu("Add to") {
-                    ForEach(tags) { tag in
-                        Button(tag.name) {
-                            items.forEach { id in
-                                addToTag(tag: tag, contactId: id)
-                            }
-                        }
-                    }
-                }
-                Menu("Remove from") {
-                    ForEach(tags.filter {
-                        items.isSubset(of: $0.contactIDs.compactMap({ UUID(uuidString: $0) }))
-                    }) { tag in
-                        Button(tag.name) {
-                            items.forEach { id in
-                                removeFromTag(tag: tag, contactId: id)
-                            }
-                        }
-                    }
-                }
-            }
-            .searchable(text: $searchString, tokens: $currentTokens, token: { tag in
-                Text(tag.name)
-            })
-            .searchSuggestions {
-                if searchString.starts(with: "#") {
-                    ForEach(tags) { tag in
-                        Text(tag.name).searchCompletion(tag)
-                    }
-                } else {
-                    ForEach(filteredContacts) { filteredContact in
-                        Text(filteredContact.fullName)
-                            .searchCompletion(filteredContact.fullName)
-                    }
-                }
-            }
-            .listStyle(.plain)
-            #if os(macOS)
-            .navigationSplitViewColumnWidth(min: 180, ideal: 200)
-            #elseif os(iOS)
-            #endif
+            middleBar
         } detail: {
-            Group {
-                if showMap {
-                    ContactMapView(contacts: .init(get: {
-                        contactSelection.compactMap({ id in
-                            filteredContacts.getById(id)
-                        })
-                    }, set: { _ in }))
-                    .transition(.move(edge: .top))
-                }
-                else if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {
-                    ContactDetailView(contact: contact)
-                } else {
-                    Text("Select an item")
-                }
-            }
-            .toolbar {
-                ToolbarItem {
-                    Button(action: { withAnimation { showMap.toggle() } }) {
-                        Label("Show map", systemImage: showMap ? "map.fill" : "map")
-                    }
-                }
-            }
-            #if os(macOS)
-            .navigationSplitViewColumnWidth(min: 300, ideal: 500)
-            #endif
+            rightBar
         }
         .task {
             await fetchContacts()
@@ -195,6 +56,156 @@ struct ContentView: View {
         .onChange(of: currentTokens) { _, newValue in
             tagSelection = Set(newValue.map { $0.uuid })
         }
+    }
+
+    private var leftBar: some View {
+        VStack {
+            if tags.isEmpty {
+                Text("Click the + button to create your first tag!")
+                    .foregroundStyle(.secondary)
+                    .padding()
+            } else {
+                List(selection: $tagSelection) {
+                    ForEach(tags.filter({ $0.parentID == nil }), id: \.uuid) { tag in
+                        TagSidebarView(tag: tag, allContacts: $allContacts)
+                    }
+                }
+            }
+            VStack {
+                Spacer()
+                Button("Edit") {
+                    showEdit.toggle()
+                }
+                .padding()
+                .popover(isPresented: $showEdit) {
+                    EditView()
+                }
+            }
+        }
+        .contentShape(Rectangle())
+        .toolbar {
+            ToolbarItem {
+                Button(action: { showCreateTag.toggle() }) {
+                    Label("Add Item", systemImage: "plus")
+                }
+                .popover(isPresented: $showCreateTag, arrowEdge: .bottom) {
+                    CreateTagView(closeView: {
+                        showCreateTag = false
+                    })
+                }
+            }
+        }
+        #if os(macOS)
+        .navigationSplitViewColumnWidth(min: 175, ideal: 175)
+        #endif
+        .dropDestination(for: UUID.self, action: { items, _ in
+            if Set(items).isSubset(of: tags.map { $0.uuid }) {
+                // These are tags
+                items.forEach { tagId in
+                    if let tagIndex = tags.firstIndex(where: { $0.uuid == tagId }) {
+                        tags[tagIndex].parentID = nil
+                    }
+                }
+            }
+            return false
+        }, isTargeted: { isTargeted in
+            self.isRootTagTargeted = isTargeted
+        })
+        .overlay {
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(isRootTagTargeted ? .blue : .clear, lineWidth: 2)
+        }
+        .onTapGesture {
+            currentTokens = []
+        }
+    }
+
+    private var middleBar: some View {
+        List(selection: $contactSelection) {
+            ForEach(filteredContacts.inLetterSections(), id: \.0) { section in
+                Section(String(section.0)) {
+                    ForEach(section.1) { contact in
+                        Group {
+                            Text(contact.givenName).bold() + Text(" ") + Text(contact.familyName)
+                        }
+                        .foregroundStyle(targetedContactId == contact.id ? Color.accentColor : Color.primary)
+                        .draggable(contact.id) {
+                            Text(contact.fullName)
+                        }
+                        .dropDestinationForTags(tags: tags, contact: contact, targetedContactId: $targetedContactId)
+                    }
+                }
+            }
+        }
+        .contextMenu(forSelectionType: CNContact.ID.self) { items in
+            Menu("Add to") {
+                ForEach(tags) { tag in
+                    Button(tag.name) {
+                        items.forEach { id in
+                            addToTag(tag: tag, contactId: id)
+                        }
+                    }
+                }
+            }
+            Menu("Remove from") {
+                ForEach(tags.filter {
+                    items.isSubset(of: $0.contactIDs.compactMap({ UUID(uuidString: $0) }))
+                }) { tag in
+                    Button(tag.name) {
+                        items.forEach { id in
+                            removeFromTag(tag: tag, contactId: id)
+                        }
+                    }
+                }
+            }
+        }
+        .searchable(text: $searchString, tokens: $currentTokens, token: { tag in
+            Text(tag.name)
+        })
+        .searchSuggestions {
+            if searchString.starts(with: "#") {
+                ForEach(tags) { tag in
+                    Text(tag.name).searchCompletion(tag)
+                }
+            } else {
+                ForEach(filteredContacts) { filteredContact in
+                    Text(filteredContact.fullName)
+                        .searchCompletion(filteredContact.fullName)
+                }
+            }
+        }
+        .listStyle(.plain)
+        #if os(macOS)
+        .navigationSplitViewColumnWidth(min: 180, ideal: 200)
+        #endif
+    }
+
+    private var rightBar: some View {
+        Group {
+            if showMap {
+                ContactMapView(contacts: .init(get: {
+                    contactSelection.compactMap({ id in
+                        filteredContacts.getById(id)
+                    })
+                }, set: { _ in }))
+                .transition(.move(edge: .top))
+            }
+            else if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {
+                ContactDetailView(contact: contact)
+            } else {
+                Text("Select an item")
+            }
+        }
+        .toolbar {
+            ToolbarItem {
+                Button(action: { withAnimation { showMap.toggle() } }) {
+                    Label("Show map", systemImage: showMap ? "map.fill" : "map")
+                }
+            }
+        }
+        #if os(macOS)
+        .navigationSplitViewColumnWidth(min: 300, ideal: 500)
+        #endif
     }
 
     private func filterContactsByTags() {
