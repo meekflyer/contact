@@ -23,9 +23,16 @@ struct ContentView: View {
     @State private var contactSelection = Set<UUID>()
 
     @State var searchString: String = ""
-    @State private var currentTokens = [Tag]()
-    var suggestedTokens: [Tag] {
-        tags
+    @State private var currentTokens = [Token]()
+    var suggestedTokens: [Token] {
+        var tokens = [Token]()
+        tags.forEach { tag in
+            tokens.append(Token(tag))
+        }
+        lists.forEach { list in
+            tokens.append(Token(list))
+        }
+        return tokens
     }
     
     @State private var targetedContactId: UUID?
@@ -55,10 +62,21 @@ struct ContentView: View {
             tagSelection = Set(newValue.map { $0.uuid })
         }
         .onChange(of: searchString) { _, _ in
-            filterContactsBySearchString()
+            withAnimation {
+                filterContactsBySearchString()
+            }
         }
         .onChange(of: tagSelection) { _, newValue in
-            currentTokens = tags.filter { newValue.contains($0.uuid) }
+            let filteredTags = tags.filter {
+                newValue.contains($0.uuid)
+            }
+            print(lists)
+            print(newValue)
+            let filteredLists = lists.filter {
+                newValue.contains($0.uuid)
+            }
+            let allGroups = filteredTags.map({ Token($0) }) + filteredLists.map({ Token($0) })
+            currentTokens = allGroups
         }
     }
 
@@ -75,11 +93,10 @@ struct ContentView: View {
                         .foregroundStyle(.secondary)
                         .padding(.horizontal)
                     List(selection: $tagSelection) {
-                        ForEach(lists) { list in
-                            Group {
-                                Text("\(list.name)").bold() + Text(" (\(list.contactIds.count))")
+                        ForEach(lists, id: \.uuid) { list in
+                            VStack {
+                                Text("\(list.name)").bold() + Text(" (\(list.contactIDs.count))")
                             }
-                            .tag(list.contactIds)
                         }
                     }
                     .frame(maxHeight: 100)
@@ -245,8 +262,8 @@ struct ContentView: View {
             return
         }
         let filteredContactIds = Set<String>(
-            currentTokens.flatMap { tag in
-                tag.getContactIDsWithDescendents(from: tags)
+            currentTokens.flatMap { token in
+                token.getContactIds(tags: tags)
             }
         )
         withAnimation {
@@ -326,7 +343,7 @@ struct ContentView: View {
                 lists.append(ContactList(
                     id: group.identifier,
                     name: group.name,
-                    contactIds: Set(contactsInGroup.map { $0.id })
+                    contactIDs: Set(contactsInGroup.map { $0.id.uuidString })
                 ))
             }
         } catch {

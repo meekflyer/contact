@@ -7,8 +7,18 @@
 
 import Foundation
 
-struct ContactList: Identifiable {
+struct ContactList: ContactGroup {
     let id: String
-    let name: String
-    let contactIds: Set<UUID>
+    var name: String
+    var contactIDs: Set<String>
+
+    var uuid: UUID {
+        // Group ids are UUIDs with ":ABGroup" appended to the end
+        let idString = String(id.dropLast(8))
+        return UUID(uuidString: idString) ?? UUID()
+    }
+
+    func getContactIds(tags: [Tag]? = nil) -> Set<String> {
+        contactIDs
+    }
 }

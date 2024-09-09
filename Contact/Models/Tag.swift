@@ -8,8 +8,47 @@
 import SwiftUI
 import SwiftData
 
+protocol ContactGroup: Equatable, Identifiable {
+    var id: String { get }
+    var uuid: UUID { get }
+    var name: String { get set }
+    var contactIDs: Set<String> { get set }
+
+    func getContactIds(tags: [Tag]?) -> Set<String>
+}
+
+struct Token: ContactGroup {
+    private var _group: any ContactGroup
+
+    init(_ group: some ContactGroup) {
+        _group = group
+    }
+
+    var id: String { _group.id }
+    var uuid: UUID { _group.uuid }
+    var name: String {
+        get { _group.name }
+        set { _group.name = newValue }
+    }
+    var contactIDs: Set<String> {
+        get { _group.contactIDs }
+        set { _group.contactIDs = newValue }
+    }
+
+    func getContactIds(tags: [Tag]?) -> Set<String> {
+        _group.getContactIds(tags: tags)
+    }
+
+    static func == (lhs: Token, rhs: Token) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.uuid == rhs.uuid &&
+        lhs.name == rhs.name &&
+        lhs.contactIDs == rhs.contactIDs
+    }
+}
+
 @Model
-final class Tag: Identifiable {
+final class Tag: ContactGroup {
     @Attribute(.unique) let id: String
     var name: String
     private var color: String
@@ -25,6 +64,11 @@ final class Tag: Identifiable {
         self.color = color.hexString
         self.parentID = parentID
         self.contactIDs = contactIDs
+    }
+
+    func getContactIds(tags: [Tag]?) -> Set<String> {
+        guard let tags else { return Set<String>() }
+        return getContactIDsWithDescendents(from: tags)
     }
 }
 
