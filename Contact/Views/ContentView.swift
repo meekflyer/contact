@@ -46,10 +46,11 @@ struct ContentView: View {
         NavigationSplitView {
             leftBar
         } content: {
-            if loading {
-                ProgressView()
-            } else {
-                middleBar
+            ZStack {
+                middleBar.opacity(loading ? 0 : 1)
+                if loading {
+                    ProgressView()
+                }
             }
         } detail: {
             rightBar
@@ -62,16 +63,12 @@ struct ContentView: View {
             tagSelection = Set(newValue.map { $0.uuid })
         }
         .onChange(of: searchString) { _, _ in
-            withAnimation {
-                filterContactsBySearchString()
-            }
+            filterContactsBySearchString()
         }
         .onChange(of: tagSelection) { _, newValue in
             let filteredTags = tags.filter {
                 newValue.contains($0.uuid)
             }
-            print(lists)
-            print(newValue)
             let filteredLists = lists.filter {
                 newValue.contains($0.uuid)
             }
@@ -233,12 +230,13 @@ struct ContentView: View {
             if showMap {
                 ContactMapView(contacts: .init(get: {
                     contactSelection.compactMap({ id in
-                        filteredContacts.getById(id)
+                        allContacts.getById(id)
                     })
                 }, set: { _ in }))
                 .transition(.move(edge: .top))
             }
-            else if let id = Array(contactSelection).last, let contact = filteredContacts.getById(id) {
+            else if let id = Array(contactSelection).last,
+                        let contact = allContacts.getById(id) {
                 ContactDetailView(contact: contact)
             } else {
                 Text("Select an item")
