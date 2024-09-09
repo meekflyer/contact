@@ -94,6 +94,7 @@ struct ContentView: View {
                             VStack {
                                 Text("\(list.name)").bold() + Text(" (\(list.contactIDs.count))")
                             }
+                            .foregroundStyle(.secondary)
                         }
                     }
                     .frame(maxHeight: 100)
