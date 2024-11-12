@@ -1,10 +1,15 @@
 # CONTACT
-Contact is a Swift application that leverages the Apple contacts framework to help users connect with others.
+Contact leverages the Apple contacts framework to help users connect with others.
+# Build Status
 # Installation
 Download and install xCode, as well as this repository. Run via xCode.
 # Future Sections
 ## Help / FAQ
 ## Resources
-## Features / Tech Stack
+## Tech Stack
+## Features
 ## Screenshots
 ## Known issues
+## Contribute
+## Credits
+## License
